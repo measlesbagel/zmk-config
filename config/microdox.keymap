@@ -22,7 +22,17 @@
             compatible = "zmk,behavior-hold-tap";
             label = "HOMEROW_MODS";
             #binding-cells = <2>;
-            tapping-term-ms = <200>;
+            tapping-term-ms = <150>;
+            quick_tap_ms = <0>;
+            flavor = "tap-preferred";
+            bindings = <&kp>, <&kp>;
+        };
+
+        wm: winkey_mods {
+            compatible = "zmk,behavior-hold-tap";
+            label = "WINKEY_MODS";
+            #binding-cells = <2>;
+            tapping-term-ms = <300>;
             quick_tap_ms = <0>;
             flavor = "tap-preferred";
             bindings = <&kp>, <&kp>;
@@ -40,7 +50,7 @@
 //             | ESC | SPC | TAB  |   | ENT | BKSP | DEL |
                         bindings = <
    &kp Q      &kp W      &kp F         &kp P         &kp B              &kp J         &kp L        &kp U         &kp Y        &kp SQT
-   &hm LGUI A &hm LALT R &hm LCTRL S   &hm LSHFT T   &kp G              &kp M         &hm RSHFT N  &hm RCTRL E   &hm RALT I   &hm RGUI O
+   &wm LGUI A &hm LALT R &hm LCTRL S   &hm LSHFT T   &kp G              &kp M         &hm RSHFT N  &hm RCTRL E   &hm RALT I   &wm RGUI O
    &kp Z      &kp X      &kp C         &kp D         &kp V              &kp K         &kp H        &kp COMMA     &kp DOT      &kp FSLH
                          &lt MEDIA ESC &lt NAV SPACE &lt BTOOTH TAB     &lt SYM ENTER &lt NUM BSPC &lt FUNC DEL
                         >;
