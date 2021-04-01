@@ -94,7 +94,7 @@
    &none      &none      &none         &none         &none              &none         &none        &none         &none        &none
    &kp LGUI   &kp LALT   &kp LCTRL     &kp LSHFT     &none              &none         &kp C_PREV   &kp C_VOL_DN  &kp C_VOL_UP &kp C_NEXT
    &none      &none      &none         &none         &none              &none         &none        &none         &none        &none
-                         &none         &none         &none              &kp C_PAUSE   &kp C_PP     &kp C_MUTE
+                         &none         &none         &none              &kp C_PAUSE   &kp C_PLAY     &kp C_MUTE
                         >;
                 };
 
