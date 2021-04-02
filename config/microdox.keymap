@@ -37,6 +37,34 @@
             flavor = "tap-preferred";
             bindings = <&kp>, <&kp>;
         };
+
+        sm: shift_mods {
+            compatible = "zmk,behavior-hold-tap";
+            label = "SHIFT_MODS";
+            #binding-cells = <2>;
+            tapping-term-ms = <150>;
+            quick_tap_ms = <0>;
+            flavor = "tap-preferred";
+            bindings = <&kp>, <&kp>;
+        };
+
+        slm: space_layer_mod {
+            compatible = "zmk,behavior-hold-tap";
+            label = "SPACE_LAYER_MOD";
+            #binding-cells = <2>;
+            tapping-term-ms = <150>;
+            quick_tap_ms = <0>;
+            flavor = "tap-preferred";
+            bindings = <&mo>, <&spcund>;
+        };
+
+        spcund: space_underscore {
+            compatible = "zmk,behavior-mod-morph";
+            label = "SPACE_UNDERSCORE";
+	    #binding-cells = <0>;
+	    bindings = <&kp SPACE>, <&kp UNDERSCORE>;
+            mods = <(MOD_LSFT|MOD_RSFT)>;
+	};
     };
     
         keymap {
@@ -50,9 +78,9 @@
 //             | ESC | SPC | TAB  |   | ENT | BKSP | DEL |
                         bindings = <
    &kp Q      &kp W      &kp F         &kp P         &kp B              &kp J         &kp L        &kp U         &kp Y        &kp SQT
-   &wm LGUI A &hm LALT R &hm LCTRL S   &hm LSHFT T   &kp G              &kp M         &hm RSHFT N  &hm RCTRL E   &hm RALT I   &wm RGUI O
+   &wm LGUI A &hm LALT R &hm LCTRL S   &sm LSHFT T   &kp G              &kp M         &sm RSHFT N  &hm RCTRL E   &hm RALT I   &wm RGUI O
    &kp Z      &kp X      &kp C         &kp D         &kp V              &kp K         &kp H        &kp COMMA     &kp DOT      &kp FSLH
-                         &lt MEDIA ESC &lt NAV SPACE &lt BTOOTH TAB     &lt SYM ENTER &lt NUM BSPC &lt FUNC DEL
+                         &lt MEDIA ESC &slm NAV SPACE &lt BTOOTH TAB     &lt SYM ENTER &lt NUM BSPC &lt FUNC DEL
                         >;
                 };
 
