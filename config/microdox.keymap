@@ -47,24 +47,7 @@
             flavor = "tap-preferred";
             bindings = <&kp>, <&kp>;
         };
-
-        slm: space_layer_mod {
-            compatible = "zmk,behavior-hold-tap";
-            label = "SPACE_LAYER_MOD";
-            #binding-cells = <2>;
-            tapping-term-ms = <150>;
-            quick_tap_ms = <0>;
-            flavor = "tap-preferred";
-            bindings = <&mo>, <&spcund>;
-        };
-
-        spcund: space_underscore {
-            compatible = "zmk,behavior-mod-morph";
-            label = "SPACE_UNDERSCORE";
-	    #binding-cells = <0>;
-	    bindings = <&kp SPACE>, <&kp UNDERSCORE>;
-            mods = <(MOD_LSFT|MOD_RSFT)>;
-	};
+        
     };
     
         keymap {
