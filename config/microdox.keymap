@@ -48,6 +48,13 @@
             bindings = <&kp>, <&kp>;
         };
         
+        test: grave_escape {
+                compatible = "zmk,behavior-mod-morph";
+                label = "GRAVE_ESCAPE";
+                #binding-cells = <0>;
+                bindings = <&kp ESC>, <&kp GRAVE>;
+                mods = <(MOD_LCTRL)>;
+        };
     };
     
         keymap {
@@ -60,10 +67,10 @@
 // |  Z  |  X  |  C  |  D  |  V   |   |  K  |  H   |  ,  |  .  |  /  |
 //             | ESC | SPC | TAB  |   | ENT | BKSP | DEL |
                         bindings = <
-   &kp Q      &kp W      &kp F         &kp P         &kp B              &kp J         &kp L        &kp U         &kp Y        &kp SQT
+   &test      &kp W      &kp F         &kp P         &kp B              &kp J         &kp L        &kp U         &kp Y        &kp SQT
    &wm LGUI A &hm LALT R &hm LCTRL S   &sm LSHFT T   &kp G              &kp M         &sm RSHFT N  &hm RCTRL E   &hm RALT I   &wm RGUI O
    &kp Z      &kp X      &kp C         &kp D         &kp V              &kp K         &kp H        &kp COMMA     &kp DOT      &kp FSLH
-                         &lt MEDIA ESC &slm NAV SPACE &lt BTOOTH TAB     &lt SYM ENTER &lt NUM BSPC &lt FUNC DEL
+                         &lt MEDIA ESC &lt NAV SPACE &lt BTOOTH TAB     &lt SYM ENTER &lt NUM BSPC &lt FUNC DEL
                         >;
                 };
 
