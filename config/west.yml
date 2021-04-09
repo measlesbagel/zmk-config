@@ -4,10 +4,12 @@ manifest:
       url-base: https://github.com/zmkfirmware
     - name: nicell
       url-base: https://github.com/Nicell
+    - name: petejohanson
+      url-base: https://github.com/petejohanson
   projects:
     - name: zmk
-      remote: nicell
-      revision: split/idle-interval
+      remote: petejohanson
+      revision: zephyr-2.5-upgrade
       import: app/west.yml
   self:
     path: config
