@@ -1,0 +1,8 @@
+name: Build firmware with official ZMK action
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@fa33e35f11d2b15311973cda9fb89dcd2376888c

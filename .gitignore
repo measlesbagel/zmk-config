@@ -1,0 +1,20 @@
+# Devenv state.
+/.devenv/
+
+# Official ZMK CLI discovery cache.
+/.zmk/
+
+# Local West workspace. It is kept out of tree because this repository itself
+# contains zephyr/module.yml, while West also checks Zephyr out as `zephyr/`.
+/.west-workspace/
+
+# Local CMake/Zephyr builds and collected firmware.
+/.build/
+/firmware/
+
+# Generated keymap-drawer intermediates.
+/keymap-drawer/*.tmp.*
+
+# Local-only Devenv overrides.
+/devenv.local.nix
+/devenv.local.yaml

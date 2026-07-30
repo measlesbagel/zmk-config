@@ -1,6 +1,43 @@
-name: Build ZMK firmware
-on: [push, pull_request, workflow_dispatch]
+name: Build firmware with Devenv
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+
+      - name: Configure the Devenv binary cache
+        uses: cachix/cachix-action@v16
+        with:
+          name: devenv
+
+      - name: Install Devenv 2.2
+        run: nix profile install github:cachix/devenv/v2.2#devenv
+
+      - name: Restore the West workspace
+        uses: actions/cache@v6
+        with:
+          path: .west-workspace
+          key: west-${{ runner.os }}-${{ hashFiles('config/west.yml') }}
+
+      - name: Build and validate
+        run: devenv test --no-tui
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v7
+        with:
+          name: firmware
+          path: firmware/*
+          if-no-files-found: error
