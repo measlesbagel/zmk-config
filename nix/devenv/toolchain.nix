@@ -29,6 +29,7 @@ in
     pkgs.gnused
     pkgs.jq
     pkgs.ninja
+    pkgs.protobuf
     pkgs.python3
     pkgs.python3Packages.protobuf
     pkgs.shellcheck
