@@ -63,8 +63,22 @@ jobs:
           purge-primary-key: never
           gc-max-store-size-linux: 0
 
+      - name: Restore the prepared Devenv state
+        id: devenv-state
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.0.0
+        with:
+          path: .devenv
+          key: devenv-${{ runner.os }}-${{ hashFiles('devenv.lock', 'devenv.yaml', 'devenv.nix', 'nix/**/*.nix') }}
+
       - name: Install Devenv 2.2
-        run: nix profile install github:cachix/devenv/v2.2#devenv
+        if: steps.devenv-state.outputs.cache-hit != 'true'
+        run: |
+          nix profile install github:cachix/devenv/v2.2#devenv
+          mkdir -p .devenv
+          readlink -f "$(command -v devenv)" > .devenv/ci-devenv-path
+
+      - name: Verify the prepared Devenv executable
+        run: test -x "$(<.devenv/ci-devenv-path)"
 
       - name: Restore the West workspace
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.0.0
@@ -73,7 +87,17 @@ jobs:
           key: west-${{ runner.os }}-${{ hashFiles('config/west.yml') }}
 
       - name: Realize, synchronize, and validate
-        run: devenv tasks run firmware:validate
+        run: |
+          "$(<.devenv/ci-devenv-path)" tasks run firmware:validate
+
+      - name: Prepare the reusable build shell
+        run: |
+          if [[ ! -f .devenv/ci-build-shell.sh ]]; then
+            "$(<.devenv/ci-devenv-path)" shell -- bash scripts/ci-build-target.sh
+            shell_script=$(grep -lF 'exec bash scripts/ci-build-target.sh' .devenv/shell-*.sh | head -n 1)
+            cp "$shell_script" .devenv/ci-build-shell.sh
+          fi
+          rm -f .devenv/run
 
   build:
     name: Build ${{ matrix.artifact-name }}
@@ -98,11 +122,6 @@ jobs:
             keep-env-derivations = true
             keep-outputs = true
 
-      - name: Configure the Devenv binary cache
-        uses: cachix/cachix-action@5f2d7c5294214f71b873db4b969586b980625e71 # v17
-        with:
-          name: devenv
-
       - name: Restore the project Nix closure
         uses: nix-community/cache-nix-action@7df957e333c1e5da7721f60227dbba6d06080569 # v7.0.2
         with:
@@ -114,8 +133,12 @@ jobs:
           purge-primary-key: never
           gc-max-store-size-linux: 0
 
-      - name: Install Devenv 2.2
-        run: nix profile install github:cachix/devenv/v2.2#devenv
+      - name: Restore the prepared Devenv state
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.0.0
+        with:
+          path: .devenv
+          key: devenv-${{ runner.os }}-${{ hashFiles('devenv.lock', 'devenv.yaml', 'devenv.nix', 'nix/**/*.nix') }}
+          fail-on-cache-miss: true
 
       - name: Restore the prepared West workspace
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.0.0
@@ -127,9 +150,7 @@ jobs:
       - name: Build firmware
         env:
           TARGET: ${{ matrix.artifact-name }}
-        run: |
-          devenv shell -- bash -c \
-            "bash scripts/workspace-sync.sh && bash scripts/build-target.sh \"${TARGET}\""
+        run: bash .devenv/ci-build-shell.sh
 
       - name: Upload firmware target
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

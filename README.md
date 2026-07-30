@@ -121,10 +121,10 @@ toolchain and development utilities.
 
 Pull requests and pushes to `main` run `.github/workflows/build.yml`. The
 workflow first realizes and caches the pinned Devenv closure and West workspace,
-then builds every `build.yaml` target on a separate matrix runner and merges the
-results into one `firmware` artifact. A manually triggered official ZMK workflow
-remains available in `.github/workflows/build-official.yml` as an independent
-fallback.
+captures a reusable build shell, then builds every `build.yaml` target on a
+separate matrix runner and merges the results into one `firmware` artifact. A
+manually triggered official ZMK workflow remains available in
+`.github/workflows/build-official.yml` as an independent fallback.
 
 The current generated keymap is shown below.
 
