@@ -2,42 +2,150 @@ name: Build firmware with Devenv
 
 on:
   push:
+    branches:
+      - main
   pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: firmware-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  matrix:
+    name: Read build matrix
+    runs-on: ubuntu-24.04
+    outputs:
+      targets: ${{ steps.matrix.outputs.targets }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Read build.yaml
+        id: matrix
+        run: echo "targets=$(yq -oj -I0 '.' build.yaml)" >> "$GITHUB_OUTPUT"
+
+  prepare:
+    name: Prepare and validate
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+        with:
+          persist-credentials: false
 
       - name: Install Nix
-        uses: cachix/install-nix-action@v31
+        uses: cachix/install-nix-action@630ae543ea3a38a9a4166f03376c02c50f408342 # v31
+        with:
+          extra_nix_config: |
+            accept-flake-config = true
+            keep-env-derivations = true
+            keep-outputs = true
 
       - name: Configure the Devenv binary cache
-        uses: cachix/cachix-action@v16
+        uses: cachix/cachix-action@5f2d7c5294214f71b873db4b969586b980625e71 # v17
         with:
           name: devenv
+
+      - name: Restore the project Nix closure
+        uses: nix-community/cache-nix-action@7df957e333c1e5da7721f60227dbba6d06080569 # v7.0.2
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('devenv.lock', 'devenv.yaml', 'devenv.nix', 'nix/**/*.nix') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          purge: true
+          purge-prefixes: nix-${{ runner.os }}-
+          purge-created: 0
+          purge-primary-key: never
+          gc-max-store-size-linux: 0
 
       - name: Install Devenv 2.2
         run: nix profile install github:cachix/devenv/v2.2#devenv
 
       - name: Restore the West workspace
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.0.0
         with:
           path: .west-workspace
           key: west-${{ runner.os }}-${{ hashFiles('config/west.yml') }}
 
-      - name: Build and validate
-        run: devenv test --no-tui
+      - name: Realize, synchronize, and validate
+        run: devenv tasks run firmware:validate
 
-      - name: Upload firmware
-        uses: actions/upload-artifact@v7
+  build:
+    name: Build ${{ matrix.artifact-name }}
+    needs:
+      - matrix
+      - prepare
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.matrix.outputs.targets) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@630ae543ea3a38a9a4166f03376c02c50f408342 # v31
+        with:
+          extra_nix_config: |
+            accept-flake-config = true
+            keep-env-derivations = true
+            keep-outputs = true
+
+      - name: Configure the Devenv binary cache
+        uses: cachix/cachix-action@5f2d7c5294214f71b873db4b969586b980625e71 # v17
+        with:
+          name: devenv
+
+      - name: Restore the project Nix closure
+        uses: nix-community/cache-nix-action@7df957e333c1e5da7721f60227dbba6d06080569 # v7.0.2
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('devenv.lock', 'devenv.yaml', 'devenv.nix', 'nix/**/*.nix') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          purge: true
+          purge-prefixes: nix-${{ runner.os }}-
+          purge-created: 0
+          purge-primary-key: never
+          gc-max-store-size-linux: 0
+
+      - name: Install Devenv 2.2
+        run: nix profile install github:cachix/devenv/v2.2#devenv
+
+      - name: Restore the prepared West workspace
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.0.0
+        with:
+          path: .west-workspace
+          key: west-${{ runner.os }}-${{ hashFiles('config/west.yml') }}
+          fail-on-cache-miss: true
+
+      - name: Build firmware
+        env:
+          TARGET: ${{ matrix.artifact-name }}
+        run: |
+          devenv shell -- bash -c \
+            "bash scripts/workspace-sync.sh && bash scripts/build-target.sh \"${TARGET}\""
+
+      - name: Upload firmware target
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: artifact-${{ matrix.artifact-name }}
+          path: firmware/${{ matrix.artifact-name }}.*
+          if-no-files-found: error
+
+  merge:
+    name: Merge firmware artifacts
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Merge firmware artifacts
+        uses: actions/upload-artifact/merge@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: firmware
-          path: firmware/*
-          if-no-files-found: error
+          pattern: artifact-*
+          delete-merged: true

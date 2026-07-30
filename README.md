@@ -104,6 +104,9 @@ devenv tasks run firmware:build:crosses
 devenv tasks run keymap:draw
 devenv tasks run keymap:check
 
+# Run generated-file, repository, and toolchain validation without compiling.
+devenv tasks run firmware:validate
+
 # Run the complete parallel build and validation graph.
 devenv test --no-tui
 ```
@@ -116,9 +119,12 @@ does not conflict with this repository's own `zephyr/module.yml`.
 trackball modules to exact commits. `devenv.lock` separately pins the Nix
 toolchain and development utilities.
 
-Pushing to GitHub runs the Devenv build in `.github/workflows/build.yml`. A
-manually triggered official ZMK workflow remains available in
-`.github/workflows/build-official.yml` as an independent fallback.
+Pull requests and pushes to `main` run `.github/workflows/build.yml`. The
+workflow first realizes and caches the pinned Devenv closure and West workspace,
+then builds every `build.yaml` target on a separate matrix runner and merges the
+results into one `firmware` artifact. A manually triggered official ZMK workflow
+remains available in `.github/workflows/build-official.yml` as an independent
+fallback.
 
 The current generated keymap is shown below.
 

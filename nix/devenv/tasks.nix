@@ -58,14 +58,20 @@ in
       '';
     };
 
-    "firmware:ci" = {
-      description = "Build all firmware and validate generated files";
+    "firmware:validate" = {
+      description = "Validate generated files, repository files, and development tools";
       exec = "true";
-      after = buildTaskNames ++ [
+      after = [
         "keymap:check"
         "repository:lint"
         "toolchain:check"
       ];
+    };
+
+    "firmware:ci" = {
+      description = "Build all firmware and validate generated files";
+      exec = "true";
+      after = buildTaskNames ++ [ "firmware:validate" ];
       before = [ "devenv:enterTest" ];
     };
   } // lib.mapAttrs (_: target: {
