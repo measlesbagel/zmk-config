@@ -1,0 +1,19 @@
+# Copyright (c) 2026
+# SPDX-License-Identifier: MIT
+
+description: Convert relative X/Y input into directional behavior taps
+
+compatible: "crosses,input-processor-text-nav"
+
+include: ip_two_param.yaml
+
+properties:
+  bindings:
+    type: phandle-array
+    required: true
+    description: Left, right, up, and down behaviors, in that order
+
+  tap-ms:
+    type: int
+    default: 5
+    description: Time between each queued behavior press and release

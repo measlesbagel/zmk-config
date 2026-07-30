@@ -1,14 +1,81 @@
 manifest:
-  defaults:
-    revision: v0.3
   remotes:
     - name: zmkfirmware
       url-base: https://github.com/zmkfirmware
-    # Additional modules containing boards/shields/custom code can be listed here as well
-    # See https://docs.zephyrproject.org/3.2.0/develop/west/manifest.html#projects
+    - name: gggw
+      url-base: https://github.com/Good-Great-Grand-Wonderful
+    - name: badjeff
+      url-base: https://github.com/badjeff
+    - name: black-trooper
+      url-base: https://github.com/black-trooper
+
   projects:
+    # ZMK and all of its Zephyr dependencies.
     - name: zmk
       remote: zmkfirmware
-      import: app/west.yml
+      revision: fa33e35f11d2b15311973cda9fb89dcd2376888c
+      import:
+        file: app/west.yml
+        name-blocklist:
+          - zephyr
+
+    # ZMK's manifest normally follows this maintenance branch. Define it here
+    # at the exact revision used by the known-good Crosses build instead.
+    - name: zephyr
+      remote: zmkfirmware
+      revision: 9df4b12b5af3438a8b9d7a33780dc3b3b2f516c1
+      clone-depth: 1
+      import:
+        name-blocklist:
+          - ci-tools
+          - hal_altera
+          - hal_cypress
+          - hal_infineon
+          - hal_microchip
+          - hal_nxp
+          - hal_openisa
+          - hal_xtensa
+          - hal_st
+          - hal_ti
+          - loramac-node
+          - mcuboot
+          - mcumgr
+          - net-tools
+          - openthread
+          - edtt
+          - trusted-firmware-m
+
+    # Crosses V2 board definition.
+    - name: crosses-v2-zmk-firmware
+      remote: gggw
+      revision: a4279793633de831c849e065663d01c05f1c89cd
+      path: modules/crosses-v2-zmk-firmware
+
+    # Pointing-device support used by the Crosses V2 trackball pipelines.
+    - name: zmk-input-processor-report-rate-limit
+      remote: badjeff
+      revision: b056cb135525933743e2627150fb390f9d4b2461
+      path: modules/zmk-input-processor-report-rate-limit
+    - name: zmk-input-processor-xyz
+      remote: badjeff
+      revision: 0f0574f6a6c5b08fa964dff7b957ce67b2e0a9cf
+      path: modules/zmk-input-processor-xyz
+    - name: zmk-driver-paw3222
+      remote: black-trooper
+      revision: 4797c7c094ae45722a43f3217b3261095df82eac
+      path: modules/zmk-driver-paw3222
+    - name: zmk-behavior-paw32xx-res-cycle
+      remote: gggw
+      revision: 98c8583f999ab810bfe2f87a663251e1d5064f03
+      path: modules/zmk-behavior-paw32xx-res-cycle
+    - name: zmk-input-processor-pipeline-switch
+      remote: gggw
+      revision: 6dde67a12f6c604300e94a412fb6f70a2cf33429
+      path: modules/zmk-input-processor-pipeline-switch
+    - name: zmk-trackball-config
+      remote: gggw
+      revision: 66af329fa4ea6484a09384f63189d921cf2df515
+      path: modules/zmk-trackball-config
+
   self:
     path: config
