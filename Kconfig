@@ -1,8 +1,8 @@
 # Copyright (c) 2026
 # SPDX-License-Identifier: MIT
 
-menuconfig CROSSES_TEXT_NAV
-    bool "Crosses trackball text navigation input processor"
+menuconfig BRIDGES_TEXT_NAV
+    bool "Bridges trackball text navigation input processor"
     default y
     depends on ZMK_POINTING
     depends on !ZMK_SPLIT || ZMK_SPLIT_ROLE_CENTRAL

@@ -1,8 +1,8 @@
 ---
 include:
-  - board: crosses_v2_left
-    artifact-name: crosses_v2_54_left
-    cmake-args: -DDTS_EXTRA_CPPFLAGS="-DCROSSES_LEFT"
-  - board: crosses_v2_right
-    artifact-name: crosses_v2_54_right
-    cmake-args: -DDTS_EXTRA_CPPFLAGS="-DCROSSES_RIGHT_CONFIG"
+  - board: bridges_v2_left
+    artifact-name: bridges_v2_54_left
+    cmake-args: -DDTS_EXTRA_CPPFLAGS="-DBRIDGES_LEFT"
+  - board: bridges_v2_right
+    artifact-name: bridges_v2_54_right
+    cmake-args: -DDTS_EXTRA_CPPFLAGS="-DBRIDGES_RIGHT_CONFIG"

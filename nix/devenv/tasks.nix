@@ -9,10 +9,10 @@ let
   buildScript = target: "bash ${buildScriptPath} ${lib.escapeShellArg target}";
 
   buildTasks = {
-    "firmware:build:crosses:left" = "crosses_v2_54_left";
-    "firmware:build:crosses:right" = "crosses_v2_54_right";
-    "firmware:build:crosses:left-reset" = "crosses_v2_left_settings_reset";
-    "firmware:build:crosses:right-reset" = "crosses_v2_settings_reset";
+    "firmware:build:bridges:left" = "bridges_v2_54_left";
+    "firmware:build:bridges:right" = "bridges_v2_54_right";
+    "firmware:build:bridges:left-reset" = "bridges_v2_left_settings_reset";
+    "firmware:build:bridges:right-reset" = "bridges_v2_settings_reset";
   };
 
   buildTaskNames = builtins.attrNames buildTasks;
@@ -25,13 +25,13 @@ in
     };
 
     "keymap:check" = {
-      description = "Verify that the rendered Crosses keymap is current";
+      description = "Verify that the rendered Bridges keymap is current";
       exec = "bash ${drawScriptPath} --check";
       after = [ "firmware:workspace:sync" ];
     };
 
     "keymap:draw" = {
-      description = "Regenerate the Crosses keymap drawing";
+      description = "Regenerate the Bridges keymap drawing";
       exec = "bash ${drawScriptPath}";
       after = [ "firmware:workspace:sync" ];
     };

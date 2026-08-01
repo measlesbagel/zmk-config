@@ -1,4 +1,4 @@
-name: crosses-v2-54-config
+name: bridges-v2-54-config
 build:
   cmake: .
   kconfig: Kconfig

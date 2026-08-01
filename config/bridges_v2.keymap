@@ -35,7 +35,7 @@
 
 /* CPI controls only exist on the right/central firmware. The corresponding
  * physical positions do not exist on the left half anyway. */
-#if defined(CROSSES_RIGHT_CONFIG)
+#if defined(BRIDGES_RIGHT_CONFIG)
 #define CPI_600  &cpi_set_r 608 1
 #define CPI_700  &cpi_set_r 684 1
 #define CPI_800  &cpi_set_r 798 1
@@ -51,7 +51,7 @@
 #define CPI_1200 &none
 #endif
 
-#if defined(CROSSES_RIGHT_CONFIG)
+#if defined(BRIDGES_RIGHT_CONFIG)
 #define ADMIN_OUTPUT &out OUT_TOG
 #else
 #define ADMIN_OUTPUT &none
@@ -107,7 +107,7 @@
 
     /* Horizontal and vertical movement thresholds are passed separately. */
     zip_text_nav: zip_text_nav {
-        compatible = "crosses,input-processor-text-nav";
+        compatible = "measlesbagel,input-processor-text-nav";
         #input-processor-cells = <2>;
         bindings = <&kp LEFT>, <&kp RIGHT>, <&kp UP>, <&kp DOWN>;
         tap-ms = <5>;
@@ -244,8 +244,9 @@
     };
 };
 
-/* The left sensor is physically absent on this build. */
-#if defined(CROSSES_LEFT)
+/* The left sensor is temporarily disabled while its processing path is moved
+ * to the central so both trackballs can follow central layer state. */
+#if defined(BRIDGES_LEFT)
 &zip_text_nav {
     status = "disabled";
 };

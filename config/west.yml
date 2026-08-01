@@ -8,6 +8,8 @@ manifest:
       url-base: https://github.com/badjeff
     - name: black-trooper
       url-base: https://github.com/black-trooper
+    - name: measlesbagel
+      url-base: https://github.com/measlesbagel
 
   projects:
     # ZMK and all of its Zephyr dependencies.
@@ -22,13 +24,13 @@ manifest:
           - zmk-studio-messages
 
     # ZMK's manifest normally follows this maintenance branch. Define it here
-    # at the exact revision used by the known-good Crosses build instead.
+    # at the exact revision used by the known-good Bridges build instead.
     - name: zephyr
       remote: zmkfirmware
       revision: 9df4b12b5af3438a8b9d7a33780dc3b3b2f516c1
       clone-depth: 1
       import:
-        # Crosses V2 uses an nRF52840 and no display. Keep only the Zephyr
+        # Bridges V2 uses an nRF52840 and no display. Keep only the Zephyr
         # modules exercised by this hardware instead of cloning every HAL.
         name-allowlist:
           - cmsis
@@ -36,13 +38,20 @@ manifest:
           - mbedtls
           - tinycrypt
 
-    # Crosses V2 board definition.
-    - name: crosses-v2-zmk-firmware
-      remote: gggw
-      revision: a4279793633de831c849e065663d01c05f1c89cd
-      path: modules/crosses-v2-zmk-firmware
+    # Bridges V2 board definition.
+    - name: bridges-v2-zmk-firmware
+      remote: measlesbagel
+      revision: 48d76e0cc93442ea2f061da7c382024eb6875e3c
+      path: modules/bridges-v2-zmk-firmware
 
-    # Pointing-device support used by the Crosses V2 trackball pipelines.
+    # Reusable pointing processors and host tuning infrastructure. The initial
+    # revision is scaffolding only; current behavior remains unchanged.
+    - name: zmk-pointing-tools
+      remote: measlesbagel
+      revision: 483fb8fea69d3a0d631dbe08b4afb6f94af0f0da
+      path: modules/zmk-pointing-tools
+
+    # Pointing-device support used by the Bridges V2 trackball pipelines.
     - name: zmk-input-processor-report-rate-limit
       remote: badjeff
       revision: b056cb135525933743e2627150fb390f9d4b2461

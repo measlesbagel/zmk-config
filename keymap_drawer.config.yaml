@@ -241,5 +241,5 @@ parse_config:
   zmk_combos: {}
   zmk_preamble: |
     #define KEYMAP_DRAWER
-    #define CROSSES_RIGHT_CONFIG
+    #define BRIDGES_RIGHT_CONFIG
   zmk_additional_includes: []

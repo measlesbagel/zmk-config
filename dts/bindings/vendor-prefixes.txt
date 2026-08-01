@@ -1,2 +1,2 @@
-crosses	Crosses V2 user configuration
 gggw	Good Great Grand Wonderful
+measlesbagel	Personal ZMK modules

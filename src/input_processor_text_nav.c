@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#define DT_DRV_COMPAT crosses_input_processor_text_nav
+#define DT_DRV_COMPAT measlesbagel_input_processor_text_nav
 
 #include <stdlib.h>
 

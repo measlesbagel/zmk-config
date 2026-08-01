@@ -1,7 +1,7 @@
 # ZMK configuration
 
 Personal ZMK configuration repository, currently containing custom firmware
-for a 54-key Crosses V2 with one right-hand trackball. The layout is
+for a 54-key Bridges V2 with dual PAW3222 trackballs. The layout is
 Colemak-DH and combines Miryoku-style layers with Urob-style "timeless"
 home-row mods.
 
@@ -19,7 +19,11 @@ home-row mods.
 - The left outer-bottom key emits `F23` for host-side application bindings;
   the right outer-bottom key is backslash/pipe.
 
-## Right trackball
+## Current pointing setup
+
+The right trackball currently provides the user-facing modes below. The left
+sensor has been physically restored but remains disabled in this transitional
+firmware while its processing path is redesigned around central layer state.
 
 | State | Behavior |
 | --- | --- |
@@ -32,7 +36,7 @@ home-row mods.
 Text, Scroll, and Sniper also provide `Q/Z/X/C/V` as
 Redo/Undo/Cut/Copy/Paste. Held Shift combines with those shortcuts for terminal
 copy/paste. Text uses only the left home-row modifiers and disables unrelated
-keys. The left sensor is disabled because it is physically disconnected.
+keys.
 
 Hold Enter or Backspace for stripped canonical Miryoku Sym and Num layers.
 Hold Delete for Bluetooth profiles, media controls, USB/BLE output toggle,
@@ -52,7 +56,7 @@ and quickly hold it to repeat Backspace instead of opening Num.
 
 ## Main tuning values
 
-Edit `config/crosses_v2.keymap`:
+Edit `config/bridges_v2.keymap`:
 
 - home-row mod timing: `tapping-term-ms`, `quick-tap-ms`, and
   `require-prior-idle-ms` in `lhm`/`rhm`
@@ -82,7 +86,7 @@ The official ZMK CLI is available as `zmk` for repository management:
 ```console
 zmk keyboard list
 zmk module list
-zmk code crosses_v2
+zmk code bridges_v2
 zmk download
 ```
 
@@ -94,11 +98,11 @@ tasks:
 devenv tasks run firmware:workspace:sync
 
 # Build one target.
-devenv tasks run firmware:build:crosses:left
-devenv tasks run firmware:build:crosses:right
+devenv tasks run firmware:build:bridges:left
+devenv tasks run firmware:build:bridges:right
 
-# Build every Crosses target, including the manual settings-reset images.
-devenv tasks run firmware:build:crosses
+# Build every Bridges target, including the manual settings-reset images.
+devenv tasks run firmware:build:bridges
 
 # Regenerate or verify the keymap drawing.
 devenv tasks run keymap:draw
@@ -115,10 +119,11 @@ Firmware is collected in `firmware/`, with separate build directories under
 `.build/`. The out-of-tree West checkout is stored in `.west-workspace/` so it
 does not conflict with this repository's own `zephyr/module.yml`.
 
-`config/west.yml` pins ZMK, Zephyr, the Crosses board definition, and all
-trackball modules to exact commits. Its Zephyr import is restricted to the
-modules used by the nRF52840 Crosses hardware. `devenv.lock` separately pins
-the local Nix toolchain and development utilities.
+`config/west.yml` pins ZMK, Zephyr, the independent Bridges board fork,
+`zmk-pointing-tools`, and the transitional trackball modules to exact commits.
+Its Zephyr import is restricted to the modules used by the nRF52840 Bridges
+hardware. `devenv.lock` separately pins the local Nix toolchain and development
+utilities.
 
 Pull requests and pushes to `main` build the two production images in
 `build.yaml` through the pinned Nix-based `urob/zmk-actions` workflow. The reset
@@ -128,4 +133,4 @@ CI only when the environment or local build scripts change.
 
 The current generated keymap is shown below.
 
-![Current keymap](keymap-drawer/crosses.svg)
+![Current keymap](keymap-drawer/bridges.svg)

@@ -3,7 +3,7 @@
 
 description: Convert relative X/Y input into directional behavior taps
 
-compatible: "crosses,input-processor-text-nav"
+compatible: "measlesbagel,input-processor-text-nav"
 
 include: ip_two_param.yaml
 
