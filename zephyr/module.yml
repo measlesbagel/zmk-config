@@ -1,3 +1,6 @@
+name: bridges-v2-54-config
 build:
+  cmake: .
+  kconfig: Kconfig
   settings:
-    board_root: .
+    dts_root: .

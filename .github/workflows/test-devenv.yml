@@ -1,0 +1,54 @@
+name: Test Devenv build environment
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - devenv.nix
+      - devenv.yaml
+      - devenv.lock
+      - nix/**
+      - scripts/**
+      - .github/workflows/test-devenv.yml
+  pull_request:
+    paths:
+      - devenv.nix
+      - devenv.yaml
+      - devenv.lock
+      - nix/**
+      - scripts/**
+      - .github/workflows/test-devenv.yml
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@630ae543ea3a38a9a4166f03376c02c50f408342 # v31
+
+      - name: Configure the Devenv binary cache
+        uses: cachix/cachix-action@5f2d7c5294214f71b873db4b969586b980625e71 # v17
+        with:
+          name: devenv
+
+      - name: Install Devenv 2.2
+        run: nix profile add github:cachix/devenv/v2.2#devenv
+
+      - name: Restore the West workspace
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.0.0
+        with:
+          path: .west-workspace
+          key: west-${{ runner.os }}-${{ hashFiles('config/west.yml') }}
+
+      - name: Test local build environment
+        run: devenv test --no-tui

@@ -1,0 +1,23 @@
+require_version: "2.2.0"
+
+inputs:
+  nixpkgs:
+    url: github:NixOS/nixpkgs/nixos-unstable
+
+  # zephyr-nix uses this source to construct the Python environment matching
+  # the Zephyr revision imported by the pinned ZMK checkout.
+  zephyr:
+    url: github:zmkfirmware/zephyr/9df4b12b5af3438a8b9d7a33780dc3b3b2f516c1
+    flake: false
+
+  zephyr-nix:
+    url: github:nix-community/zephyr-nix
+    inputs:
+      nixpkgs:
+        follows: nixpkgs
+      zephyr:
+        follows: zephyr
+
+  zmk-cli:
+    url: github:zmkfirmware/zmk-cli/v0.4.1
+    flake: false
