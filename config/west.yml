@@ -18,6 +18,8 @@ manifest:
         file: app/west.yml
         name-blocklist:
           - zephyr
+          - hal_stm32
+          - zmk-studio-messages
 
     # ZMK's manifest normally follows this maintenance branch. Define it here
     # at the exact revision used by the known-good Crosses build instead.
@@ -26,24 +28,13 @@ manifest:
       revision: 9df4b12b5af3438a8b9d7a33780dc3b3b2f516c1
       clone-depth: 1
       import:
-        name-blocklist:
-          - ci-tools
-          - hal_altera
-          - hal_cypress
-          - hal_infineon
-          - hal_microchip
-          - hal_nxp
-          - hal_openisa
-          - hal_xtensa
-          - hal_st
-          - hal_ti
-          - loramac-node
-          - mcuboot
-          - mcumgr
-          - net-tools
-          - openthread
-          - edtt
-          - trusted-firmware-m
+        # Crosses V2 uses an nRF52840 and no display. Keep only the Zephyr
+        # modules exercised by this hardware instead of cloning every HAL.
+        name-allowlist:
+          - cmsis
+          - hal_nordic
+          - mbedtls
+          - tinycrypt
 
     # Crosses V2 board definition.
     - name: crosses-v2-zmk-firmware

@@ -33,8 +33,8 @@
 #define EDIT_COPY  &kp LC(C)
 #define EDIT_PASTE &kp LC(V)
 
-/* The CPI and Studio controls only exist on the right/central firmware. The
- * corresponding physical positions do not exist on the left half anyway. */
+/* CPI controls only exist on the right/central firmware. The corresponding
+ * physical positions do not exist on the left half anyway. */
 #if defined(CROSSES_RIGHT_CONFIG)
 #define CPI_600  &cpi_set_r 608 1
 #define CPI_700  &cpi_set_r 684 1
@@ -52,32 +52,12 @@
 #endif
 
 #if defined(CROSSES_RIGHT_CONFIG)
-#define ADMIN_STUDIO &studio_unlock
-#else
-#define ADMIN_STUDIO &none
-#endif
-
-#if defined(CROSSES_RIGHT_CONFIG)
 #define ADMIN_OUTPUT &out OUT_TOG
 #else
 #define ADMIN_OUTPUT &none
 #endif
 
-/* This configuration always uses all 54 physical keys. Prevent a persisted
- * Studio selection from activating the board's 42- or 36-key transforms. */
-&gggw_crosses_42_layout {
-    status = "disabled";
-};
-
-&gggw_crosses_36_layout {
-    status = "disabled";
-};
-
 / {
-    chosen {
-        zmk,physical-layout = &gggw_crosses_54_layout;
-    };
-
     behaviors {
         /* Urob-style "timeless" positional home-row mod-taps. */
         lhm: left_home_mods {
@@ -222,7 +202,7 @@
                 &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &bt BT_CLR   CPI_600 CPI_700 CPI_800 CPI_900 CPI_1000 CPI_1200
                 &none &none &none &none &none &none   &none &none &none &none &none &none
                 &none &kp LGUI &kp LALT &kp LCTRL &kp LSHFT &none   &kp C_MUTE &kp C_PREV &kp C_VOL_DN &kp C_VOL_UP &kp C_NEXT &none
-                ADMIN_OUTPUT &none &none &none &none &none   &kp C_STOP &kp C_PP &none &none &none ADMIN_STUDIO
+                ADMIN_OUTPUT &none &none &none &none &none   &kp C_STOP &kp C_PP &none &none &none &none
                                   &trans &trans &trans   &trans &trans &trans
             >;
         };

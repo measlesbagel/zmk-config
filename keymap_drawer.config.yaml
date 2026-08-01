@@ -99,9 +99,6 @@ parse_config:
     "&mkp RCLK":
       tap: $$mdi:mouse-right-click$$
       hold: "right"
-    "&studio_unlock":
-      tap: $$mdi:lock-open$$
-      hold: "unlock"
     "&pipe_switch":
       tap: $$mdi:toggle-switch$$
       hold: "toggle"

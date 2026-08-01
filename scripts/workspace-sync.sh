@@ -37,6 +37,13 @@ if workspace_current; then
     exit
 fi
 
+# West does not remove projects dropped from a manifest. Recreate an outdated
+# workspace so dependency pruning also reduces local and CI cache size.
+if [[ -f "$workspace/.west/config" ]]; then
+    echo "Manifest changed; recreating the West workspace"
+    rm -rf "$workspace"
+fi
+
 mkdir -p "$manifest_dir"
 cp "$manifest_source" "$manifest_copy"
 

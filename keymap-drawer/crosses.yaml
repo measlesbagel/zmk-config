@@ -1,4 +1,4 @@
-layout: {zmk_keyboard: crosses_v2, layout_name: gggw_crosses_54_layout}
+layout: {zmk_keyboard: crosses_v2}
 layers:
   Base:
   - {t: '`', h: F11}
@@ -433,7 +433,7 @@ layers:
   - {t: '$$mdi:minus-circle-outline$$', type: none}
   - {t: '$$mdi:minus-circle-outline$$', type: none}
   - {t: '$$mdi:minus-circle-outline$$', type: none}
-  - {t: '$$mdi:lock-open$$', h: unlock}
+  - {t: '$$mdi:minus-circle-outline$$', type: none}
   - {t: '$$mdi:transfer$$', type: trans}
   - {t: '$$mdi:transfer$$', type: trans}
   - {t: '$$mdi:transfer$$', type: trans}

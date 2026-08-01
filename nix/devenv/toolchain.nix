@@ -24,14 +24,10 @@ in
     pkgs.findutils
     pkgs.gcc
     pkgs.git
-    pkgs.gh
     pkgs.gnugrep
     pkgs.gnused
     pkgs.jq
     pkgs.ninja
-    pkgs.protobuf
-    pkgs.python3
-    pkgs.python3Packages.protobuf
     pkgs.shellcheck
     pkgs.yq
   ];

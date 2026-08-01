@@ -36,7 +36,7 @@ keys. The left sensor is disabled because it is physically disconnected.
 
 Hold Enter or Backspace for stripped canonical Miryoku Sym and Num layers.
 Hold Delete for Bluetooth profiles, media controls, USB/BLE output toggle,
-Studio unlock, and persistent right-trackball CPI presets.
+and persistent right-trackball CPI presets.
 
 ### Admin controls
 
@@ -45,7 +45,7 @@ Studio unlock, and persistent right-trackball CPI presets.
   PAW3222 values are 608/684/798/912/988/1216).
 - Right home: mute, previous, volume down/up, and next.
 - Right bottom: stop and play/pause.
-- Left and right outer-bottom keys: output toggle and Studio unlock.
+- Left outer-bottom key: output toggle.
 
 The dual-role thumbs support tap-then-hold repeat: for example, tap Backspace
 and quickly hold it to repeat Backspace instead of opening Num.
@@ -97,7 +97,7 @@ devenv tasks run firmware:workspace:sync
 devenv tasks run firmware:build:crosses:left
 devenv tasks run firmware:build:crosses:right
 
-# Build every Crosses target, including settings reset images.
+# Build every Crosses target, including the manual settings-reset images.
 devenv tasks run firmware:build:crosses
 
 # Regenerate or verify the keymap drawing.
@@ -116,15 +116,15 @@ Firmware is collected in `firmware/`, with separate build directories under
 does not conflict with this repository's own `zephyr/module.yml`.
 
 `config/west.yml` pins ZMK, Zephyr, the Crosses board definition, and all
-trackball modules to exact commits. `devenv.lock` separately pins the Nix
-toolchain and development utilities.
+trackball modules to exact commits. Its Zephyr import is restricted to the
+modules used by the nRF52840 Crosses hardware. `devenv.lock` separately pins
+the local Nix toolchain and development utilities.
 
-Pull requests and pushes to `main` run `.github/workflows/build.yml`. The
-workflow first realizes and caches the pinned Devenv closure and West workspace,
-captures a reusable build shell, then builds every `build.yaml` target on a
-separate matrix runner and merges the results into one `firmware` artifact. A
-manually triggered official ZMK workflow remains available in
-`.github/workflows/build-official.yml` as an independent fallback.
+Pull requests and pushes to `main` build the two production images in
+`build.yaml` through the pinned Nix-based `urob/zmk-actions` workflow. The reset
+images in `build-reset.yaml` and the official ZMK fallback are separate manual
+workflows. Devenv remains the local source of truth; its full build is tested in
+CI only when the environment or local build scripts change.
 
 The current generated keymap is shown below.
 

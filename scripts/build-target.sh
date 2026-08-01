@@ -4,7 +4,10 @@ set -euo pipefail
 : "${DEVENV_ROOT:?Run this command from the Devenv environment}"
 
 target="${1:?usage: build-target.sh ARTIFACT_NAME}"
-matrix="$DEVENV_ROOT/build.yaml"
+matrices=(
+    "$DEVENV_ROOT/build.yaml"
+    "$DEVENV_ROOT/build-reset.yaml"
+)
 workspace="$DEVENV_ROOT/.west-workspace"
 build_dir="$DEVENV_ROOT/.build/$target"
 firmware_dir="$DEVENV_ROOT/firmware"
@@ -14,20 +17,27 @@ if [[ ! -f "$workspace/.west/config" || ! -d "$workspace/zmk/app" ]]; then
     exit 1
 fi
 
-entry="$({
-    # $target is a jq variable supplied by --arg, not a shell expansion.
-    # shellcheck disable=SC2016
-    yq -c --arg target "$target" \
-        '.include[] | select(."artifact-name" == $target)' "$matrix"
-} || true)"
+entry=""
+for matrix in "${matrices[@]}"; do
+    [[ -f "$matrix" ]] || continue
+    candidate="$({
+        # $target is a jq variable supplied by --arg, not a shell expansion.
+        # shellcheck disable=SC2016
+        yq -c --arg target "$target" \
+            '.include[] | select(."artifact-name" == $target)' "$matrix"
+    } || true)"
+
+    if [[ -n "$candidate" ]]; then
+        if [[ -n "$entry" || "$(printf '%s\n' "$candidate" | wc -l)" -ne 1 ]]; then
+            echo "Multiple build manifests have artifact-name '$target'" >&2
+            exit 1
+        fi
+        entry="$candidate"
+    fi
+done
 
 if [[ -z "$entry" ]]; then
-    echo "No build.yaml entry has artifact-name '$target'" >&2
-    exit 1
-fi
-
-if [[ "$(printf '%s\n' "$entry" | wc -l)" -ne 1 ]]; then
-    echo "Multiple build.yaml entries have artifact-name '$target'" >&2
+    echo "No build manifest entry has artifact-name '$target'" >&2
     exit 1
 fi
 

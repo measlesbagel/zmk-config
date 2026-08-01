@@ -42,8 +42,6 @@ in
         test "$(zmk --version)" = "0.4.1"
         west --version
         keymap --version
-        protoc --version
-        python -c 'import google.protobuf'
         if [[ -x /usr/bin/op ]]; then
           test "$(command -v op)" = "/usr/bin/op"
         fi
