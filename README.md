@@ -27,8 +27,7 @@ firmware while its processing path is redesigned around central layer state.
 
 | State | Behavior |
 | --- | --- |
-| Default | Cursor; movement temporarily enables the Button layer |
-| Button | Mirrored `W/F/P` and `L/U/Y` right/middle/left clicks |
+| Default | Cursor; ordinary typing keys are never remapped automatically |
 | Hold Tab | Vertical/horizontal scrolling |
 | Hold Esc | Trackball arrows; physical `N/E/I/O` are left/down/up/right |
 | Hold Space | Quarter-speed cursor with the mirrored click keys |
@@ -60,7 +59,6 @@ Edit `config/bridges_v2.keymap`:
 
 - home-row mod timing: `tapping-term-ms`, `quick-tap-ms`, and
   `require-prior-idle-ms` in `lhm`/`rhm`
-- automatic Button timeout: `&zip_temp_layer BUTTON 1200`
 - Text movement thresholds: `&zip_text_nav 25 50` (horizontal, vertical;
   lower is faster)
 - scroll speed: `&zip_scroll_scaler 1 8`
@@ -68,6 +66,22 @@ Edit `config/bridges_v2.keymap`:
 
 The custom Text processor lives in `src/input_processor_text_nav.c` and is
 packaged as an in-repository Zephyr module.
+
+## Pointing telemetry
+
+The central firmware advertises read-only raw and processed right-trackball
+streams through `zmk-pointing-tools`. Connect the right half over USB, then run
+the local viewer from a sibling checkout:
+
+```console
+cd ../zmk-pointing-tools
+devenv up
+```
+
+Open <http://localhost:8787> in desktop Chrome. Telemetry is disabled until the
+viewer requests it and automatically stops if its heartbeat disappears. Trace
+sessions can be exported as JSON. The creator-hosted tuning site uses an older,
+incompatible protocol and is no longer required.
 
 ## Building
 
