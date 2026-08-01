@@ -48,7 +48,7 @@ manifest:
     # revision is scaffolding only; current behavior remains unchanged.
     - name: zmk-pointing-tools
       remote: measlesbagel
-      revision: 9b1b9044e2bea5b5a5f6f35589ffc377528eff79
+      revision: 111cf5454f6f99f8884dec270f0cefcc29871f55
       path: modules/zmk-pointing-tools
 
     # Pointing-device support used by the Bridges V2 trackball pipelines.
