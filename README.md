@@ -34,6 +34,8 @@ that rejects short typing-vibration gestures.
 
 The left trackball remains adaptive scroll in every state, including while a
 right-trackball mode is held. Holding Tab therefore makes both balls scroll.
+Its gain is calibrated independently because equal repeated gestures produced
+substantially less raw distance with the left hand.
 
 Text, Scroll, and Sniper also provide `Q/Z/X/C/V` as
 Redo/Undo/Cut/Copy/Paste. Held Shift combines with those shortcuts for terminal

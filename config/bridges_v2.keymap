@@ -266,9 +266,11 @@
     zpt_left_scroll: zpt_left_scroll {
         compatible = "measlesbagel,zpt-input-processor-scroll";
         #input-processor-cells = <1>;
-        scale-multiplier = <1>;
-        scale-divisor = <8>;
-        report-interval-ms = <16>;
+        /* Left split frames are already coalesced to 16 ms for BLE transport.
+         * The 7/16 gain normalizes the measured non-dominant-hand distance. */
+        scale-multiplier = <7>;
+        scale-divisor = <16>;
+        report-interval-ms = <1>;
         idle-timeout-ms = <120>;
         intent-window-ms = <64>;
         activation-distance = <32>;
