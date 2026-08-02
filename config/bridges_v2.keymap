@@ -235,6 +235,11 @@
         label = "Left output";
     };
 
+    zpt_left_sign_extend: zpt_left_sign_extend {
+        compatible = "measlesbagel,zpt-input-processor-sign-extend-xy";
+        #input-processor-cells = <0>;
+    };
+
     /* The processor is also a virtual input device. Its dedicated listener
      * receives coalesced horizontal/vertical wheel frames. */
     zpt_right_scroll: zpt_right_scroll {
@@ -326,6 +331,7 @@
  * always converts them to guarded adaptive scrolling, independent of layers. */
 &trackball_peripheral_listener {
     input-processors = <&zip_zxy>,
+                       <&zpt_left_sign_extend>,
                        <&zpt_left_raw>,
                        <&zpt_left_scroll ZPT_AXIS_ADAPTIVE>;
 };
