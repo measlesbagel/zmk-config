@@ -219,6 +219,22 @@
         label = "Right output";
     };
 
+    zpt_left_raw: zpt_left_raw {
+        compatible = "measlesbagel,zpt-input-processor-trace";
+        #input-processor-cells = <0>;
+        pointing-device-id = <0>;
+        stage = <0>;
+        label = "Left raw";
+    };
+
+    zpt_left_output: zpt_left_output {
+        compatible = "measlesbagel,zpt-input-processor-trace";
+        #input-processor-cells = <0>;
+        pointing-device-id = <0>;
+        stage = <1>;
+        label = "Left output";
+    };
+
     /* The processor is also a virtual input device. Its dedicated listener
      * receives coalesced horizontal/vertical wheel frames. */
     zpt_right_scroll: zpt_right_scroll {
@@ -238,6 +254,28 @@
         compatible = "zmk,input-listener";
         device = <&zpt_right_scroll>;
         input-processors = <&zpt_right_output>;
+    };
+
+    /* Dedicated always-on left scrolling uses a larger activation gate than
+     * momentary right scrolling so typing vibration produces no output. */
+    zpt_left_scroll: zpt_left_scroll {
+        compatible = "measlesbagel,zpt-input-processor-scroll";
+        #input-processor-cells = <1>;
+        scale-multiplier = <1>;
+        scale-divisor = <8>;
+        report-interval-ms = <16>;
+        idle-timeout-ms = <120>;
+        intent-window-ms = <64>;
+        activation-distance = <32>;
+        engage-ratio-percent = <300>;
+        release-ratio-percent = <180>;
+        discard-unclassified;
+    };
+
+    zpt_left_scroll_output: zpt_left_scroll_output {
+        compatible = "zmk,input-listener";
+        device = <&zpt_left_scroll>;
+        input-processors = <&zpt_left_output>;
     };
 
     zpt_telemetry {
@@ -283,20 +321,19 @@
             , <&zpt_right_output>;
     };
 };
+
+/* The peripheral sends raw left-ball vectors to the central. This listener
+ * always converts them to guarded adaptive scrolling, independent of layers. */
+&trackball_peripheral_listener {
+    input-processors = <&zpt_left_raw>,
+                       <&zpt_left_scroll ZPT_AXIS_ADAPTIVE>;
+};
 #endif
 
 /* The left sensor is temporarily disabled while its processing path is moved
  * to the central so both trackballs can follow central layer state. */
 #if defined(BRIDGES_LEFT)
 &zpt_text_nav {
-    status = "disabled";
-};
-
-&trackball_peripheral {
-    status = "disabled";
-};
-
-&trackball_peripheral_split {
     status = "disabled";
 };
 

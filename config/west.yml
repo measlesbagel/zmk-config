@@ -41,13 +41,13 @@ manifest:
     # Bridges V2 board definition.
     - name: bridges-v2-zmk-firmware
       remote: measlesbagel
-      revision: f44e2b0421979e336101dcab6db3f799b26d7ef2
+      revision: 635bd304cd9692606a6920884def480d536f401f
       path: modules/bridges-v2-zmk-firmware
 
     # Reusable pointing processors and host tuning infrastructure.
     - name: zmk-pointing-tools
       remote: measlesbagel
-      revision: f42cdb4241cc06db72cdf9e32773025f63af8a64
+      revision: 46b822e90dcf5493a92eb7ed40b42666d9265493
       path: modules/zmk-pointing-tools
 
     # Pointing-device support used by the Bridges V2 trackball pipelines.
