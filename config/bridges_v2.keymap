@@ -261,8 +261,8 @@
         input-processors = <&zpt_right_output>;
     };
 
-    /* Dedicated always-on left scrolling uses a larger activation gate than
-     * momentary right scrolling so typing vibration produces no output. */
+    /* Dedicated left scrolling ignores movement briefly after physical key
+     * presses, preserving fine trackball motion while rejecting typing shake. */
     zpt_left_scroll: zpt_left_scroll {
         compatible = "measlesbagel,zpt-input-processor-scroll";
         #input-processor-cells = <1>;
@@ -273,10 +273,10 @@
         report-interval-ms = <1>;
         idle-timeout-ms = <120>;
         intent-window-ms = <64>;
-        activation-distance = <32>;
+        activation-distance = <16>;
         engage-ratio-percent = <300>;
         release-ratio-percent = <180>;
-        discard-unclassified;
+        suppress-after-keypress-ms = <75>;
     };
 
     zpt_left_scroll_output: zpt_left_scroll_output {
