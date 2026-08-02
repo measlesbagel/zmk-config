@@ -22,8 +22,9 @@ home-row mods.
 ## Current pointing setup
 
 The right trackball provides the layer-controlled modes below. The left
-trackball is a dedicated always-on adaptive scroll device with a motion gate
-that rejects short typing-vibration gestures.
+trackball is a dedicated always-on adaptive scroll device with a keypress guard
+that briefly suppresses movement after physical key presses to reject typing
+vibration without imposing a scroll dead zone.
 
 | State | Behavior |
 | --- | --- |
