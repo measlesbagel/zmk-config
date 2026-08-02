@@ -59,7 +59,7 @@ and persistent right-trackball CPI presets.
 The dual-role thumbs support tap-then-hold repeat: for example, tap Backspace
 and quickly hold it to repeat Backspace instead of opening Num.
 
-## Main tuning values
+## Compiled tuning values
 
 Edit `config/bridges_v2.keymap`:
 
@@ -73,25 +73,33 @@ Edit `config/bridges_v2.keymap`:
   `intent-window-ms` on `zpt_right_scroll`
 - sniper speed: `&zip_xy_scaler 1 4`
 
+The scroll values above, including the left-trackball physical keypress guard,
+can also be previewed at runtime from the local tuner. Runtime previews are
+validated and held only in RAM; reset them from the page or reboot to restore
+these Git-tracked defaults.
+
 The reusable Scroll and Text processors live in the separately pinned
 `zmk-pointing-tools` module. Text locks one physical axis for each gesture;
 its independent step thresholds no longer bias that initial axis decision.
 
-## Pointing telemetry
+## Pointing telemetry and runtime tuning
 
-The central firmware advertises read-only raw and processed streams for both
-trackballs through `zmk-pointing-tools`. Connect the right half over USB, then run
-the local viewer from a sibling checkout:
+The central firmware advertises raw and processed streams plus temporary scroll
+tuning targets for both trackballs through `zmk-pointing-tools`. Connect the
+right half over USB, then run the local tuner from a sibling checkout:
 
 ```console
 cd ../zmk-pointing-tools
 devenv up
 ```
 
-Open <http://localhost:8787> in desktop Chrome. Telemetry is disabled until the
-viewer requests it and automatically stops if its heartbeat disappears. Trace
-sessions can be exported as JSON. The creator-hosted tuning site uses an older,
-incompatible protocol and is no longer required.
+Open <http://localhost:8787> in desktop Chrome. The page discovers `Left scroll`
+and `Right scroll` independently and can preview scale, timing, axis-intent,
+keypress-guard, and filtering values. It never writes firmware settings to
+flash. Telemetry is disabled until requested and automatically stops if its
+heartbeat disappears; trace sessions can be exported as JSON. The
+creator-hosted tuning site uses an older, incompatible protocol and is no
+longer required.
 
 ## Building
 
