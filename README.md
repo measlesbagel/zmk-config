@@ -21,9 +21,9 @@ home-row mods.
 
 ## Current pointing setup
 
-The right trackball currently provides the user-facing modes below. The left
-sensor has been physically restored but remains disabled in this transitional
-firmware while its processing path is redesigned around central layer state.
+The right trackball provides the layer-controlled modes below. The left
+trackball is a dedicated always-on adaptive scroll device with a motion gate
+that rejects short typing-vibration gestures.
 
 | State | Behavior |
 | --- | --- |
@@ -31,6 +31,9 @@ firmware while its processing path is redesigned around central layer state.
 | Hold Tab | Coalesced adaptive vertical/horizontal scrolling |
 | Hold Esc | Trackball arrows; physical `N/E/I/O` are left/down/up/right |
 | Hold Space | Quarter-speed cursor with the mirrored click keys |
+
+The left trackball remains adaptive scroll in every state, including while a
+right-trackball mode is held. Holding Tab therefore makes both balls scroll.
 
 Text, Scroll, and Sniper also provide `Q/Z/X/C/V` as
 Redo/Undo/Cut/Copy/Paste. Held Shift combines with those shortcuts for terminal
@@ -73,8 +76,8 @@ its independent step thresholds no longer bias that initial axis decision.
 
 ## Pointing telemetry
 
-The central firmware advertises read-only raw and processed right-trackball
-streams through `zmk-pointing-tools`. Connect the right half over USB, then run
+The central firmware advertises read-only raw and processed streams for both
+trackballs through `zmk-pointing-tools`. Connect the right half over USB, then run
 the local viewer from a sibling checkout:
 
 ```console
