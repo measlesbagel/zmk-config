@@ -47,7 +47,7 @@ manifest:
     # Reusable pointing processors and host tuning infrastructure.
     - name: zmk-pointing-tools
       remote: measlesbagel
-      revision: 52ee92a1c404c05bcd847b807d39d822aaddd4b2
+      revision: f42cdb4241cc06db72cdf9e32773025f63af8a64
       path: modules/zmk-pointing-tools
 
     # Pointing-device support used by the Bridges V2 trackball pipelines.
