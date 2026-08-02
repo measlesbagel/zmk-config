@@ -325,7 +325,8 @@
 /* The peripheral sends raw left-ball vectors to the central. This listener
  * always converts them to guarded adaptive scrolling, independent of layers. */
 &trackball_peripheral_listener {
-    input-processors = <&zpt_left_raw>,
+    input-processors = <&zip_zxy>,
+                       <&zpt_left_raw>,
                        <&zpt_left_scroll ZPT_AXIS_ADAPTIVE>;
 };
 #endif
