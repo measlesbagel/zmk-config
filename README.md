@@ -76,7 +76,8 @@ Edit `config/bridges_v2.keymap`:
 The scroll values above, including the left-trackball physical keypress guard,
 can also be previewed at runtime from the local tuner. Runtime previews are
 validated and held only in RAM; reset them from the page or reboot to restore
-these Git-tracked defaults.
+these Git-tracked defaults. The left guard currently defaults to the tested
+40 ms threshold.
 
 The reusable Scroll and Text processors live in the separately pinned
 `zmk-pointing-tools` module. Text locks one physical axis for each gesture;
