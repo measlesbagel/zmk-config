@@ -4,6 +4,7 @@
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/outputs.h>
 #include <dt-bindings/zmk/pointing.h>
+#include <dt-bindings/zmk/pointing_tools.h>
 
 /*
  * Physical positions (54-key layout):
@@ -104,12 +105,16 @@
         };
     };
 
-    /* Horizontal and vertical movement thresholds are passed separately. */
-    zip_text_nav: zip_text_nav {
-        compatible = "measlesbagel,input-processor-text-nav";
+    /* Horizontal and vertical step distances remain independent; axis intent
+     * is selected from physical gesture geometry before either is applied. */
+    zpt_text_nav: zpt_text_nav {
+        compatible = "measlesbagel,zpt-input-processor-text-nav";
         #input-processor-cells = <2>;
         bindings = <&kp LEFT>, <&kp RIGHT>, <&kp UP>, <&kp DOWN>;
         tap-ms = <5>;
+        idle-timeout-ms = <120>;
+        activation-distance = <12>;
+        engage-ratio-percent = <150>;
     };
 
     keymap {
@@ -214,6 +219,27 @@
         label = "Right output";
     };
 
+    /* The processor is also a virtual input device. Its dedicated listener
+     * receives coalesced horizontal/vertical wheel frames. */
+    zpt_right_scroll: zpt_right_scroll {
+        compatible = "measlesbagel,zpt-input-processor-scroll";
+        #input-processor-cells = <1>;
+        scale-multiplier = <1>;
+        scale-divisor = <8>;
+        report-interval-ms = <16>;
+        idle-timeout-ms = <120>;
+        intent-window-ms = <64>;
+        activation-distance = <16>;
+        engage-ratio-percent = <300>;
+        release-ratio-percent = <180>;
+    };
+
+    zpt_right_scroll_output: zpt_right_scroll_output {
+        compatible = "zmk,input-listener";
+        device = <&zpt_right_scroll>;
+        input-processors = <&zpt_right_output>;
+    };
+
     zpt_telemetry {
         compatible = "measlesbagel,zpt-telemetry";
     };
@@ -236,7 +262,7 @@
         input-processors
             = <&zpt_right_raw>
             , <&zip_xy_transform (INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>
-            , <&zip_text_nav 25 50>;
+            , <&zpt_text_nav 25 50>;
     };
 
     scroll_mode {
@@ -244,10 +270,7 @@
         input-processors
             = <&zpt_right_raw>
             , <&zip_xy_transform (INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>
-            , <&zip_xy_to_scroll_mapper>
-            , <&zip_scroll_scaler 1 8>
-            , <&zip_report_rate_limit 16>
-            , <&zpt_right_output>;
+            , <&zpt_right_scroll ZPT_AXIS_ADAPTIVE>;
     };
 
     sniper_mode {
@@ -265,7 +288,7 @@
 /* The left sensor is temporarily disabled while its processing path is moved
  * to the central so both trackballs can follow central layer state. */
 #if defined(BRIDGES_LEFT)
-&zip_text_nav {
+&zpt_text_nav {
     status = "disabled";
 };
 
