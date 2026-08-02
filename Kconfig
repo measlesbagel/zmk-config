@@ -1,10 +1,3 @@
-# Copyright (c) 2026
 # SPDX-License-Identifier: MIT
 
-menuconfig BRIDGES_TEXT_NAV
-    bool "Bridges trackball text navigation input processor"
-    default y
-    depends on ZMK_POINTING
-    depends on !ZMK_SPLIT || ZMK_SPLIT_ROLE_CENTRAL
-    help
-      Convert relative trackball X/Y movement into arrow-key behavior taps.
+# Personal feature Kconfig symbols live in their reusable modules.

@@ -28,7 +28,7 @@ firmware while its processing path is redesigned around central layer state.
 | State | Behavior |
 | --- | --- |
 | Default | Cursor; ordinary typing keys are never remapped automatically |
-| Hold Tab | Vertical/horizontal scrolling |
+| Hold Tab | Coalesced adaptive vertical/horizontal scrolling |
 | Hold Esc | Trackball arrows; physical `N/E/I/O` are left/down/up/right |
 | Hold Space | Quarter-speed cursor with the mirrored click keys |
 
@@ -59,13 +59,17 @@ Edit `config/bridges_v2.keymap`:
 
 - home-row mod timing: `tapping-term-ms`, `quick-tap-ms`, and
   `require-prior-idle-ms` in `lhm`/`rhm`
-- Text movement thresholds: `&zip_text_nav 25 50` (horizontal, vertical;
+- Text movement thresholds: `&zpt_text_nav 25 50` (horizontal, vertical;
   lower is faster)
-- scroll speed: `&zip_scroll_scaler 1 8`
+- scroll speed: `scale-multiplier` / `scale-divisor` on `zpt_right_scroll`
+- scroll coalescing: `report-interval-ms` on `zpt_right_scroll`
+- adaptive axis intent: `engage-ratio-percent`, `release-ratio-percent`, and
+  `intent-window-ms` on `zpt_right_scroll`
 - sniper speed: `&zip_xy_scaler 1 4`
 
-The custom Text processor lives in `src/input_processor_text_nav.c` and is
-packaged as an in-repository Zephyr module.
+The reusable Scroll and Text processors live in the separately pinned
+`zmk-pointing-tools` module. Text locks one physical axis for each gesture;
+its independent step thresholds no longer bias that initial axis decision.
 
 ## Pointing telemetry
 
