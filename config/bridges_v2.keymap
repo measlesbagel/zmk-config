@@ -110,6 +110,7 @@
     zpt_text_nav: zpt_text_nav {
         compatible = "measlesbagel,zpt-input-processor-text-nav";
         #input-processor-cells = <0>;
+        tuning-id = "text-navigation";
         tuning-label = "Text navigation";
         horizontal-threshold = <75>;
         vertical-threshold = <75>;
@@ -248,6 +249,7 @@
     zpt_right_scroll: zpt_right_scroll {
         compatible = "measlesbagel,zpt-input-processor-scroll";
         #input-processor-cells = <1>;
+        tuning-id = "right-scroll";
         tuning-label = "Right scroll";
         scale-multiplier = <1>;
         scale-divisor = <8>;
@@ -270,6 +272,7 @@
     zpt_left_scroll: zpt_left_scroll {
         compatible = "measlesbagel,zpt-input-processor-scroll";
         #input-processor-cells = <1>;
+        tuning-id = "left-scroll";
         tuning-label = "Left scroll";
         /* Left split frames are already coalesced to 16 ms for BLE transport.
          * The 7/16 gain normalizes the measured non-dominant-hand distance. */
