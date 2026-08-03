@@ -102,10 +102,14 @@ devenv up
 Open <http://localhost:8787> in desktop Chrome. The page discovers `Left
 scroll`, `Right scroll`, and `Text navigation` independently. It can preview
 scroll scale/filtering, text step distances, axis intent, timing, and the
-keypress guard. It never writes firmware settings to flash. Telemetry is
-disabled until requested and automatically stops if its heartbeat disappears;
-trace sessions can be exported as JSON. The creator-hosted tuning site uses an
-older, incompatible protocol and is no longer required.
+keypress guard. Stable `tuning-id` values allow versioned profiles to be
+exported and imported without depending on boot-time target order. **Copy
+config** generates a reviewable devicetree overlay for transferring current
+values back into this repository. Profile imports remain temporary and never
+write firmware settings to flash. Telemetry is disabled until requested and
+automatically stops if its heartbeat disappears; trace sessions can be
+exported as JSON. The creator-hosted tuning site uses an older, incompatible
+protocol and is no longer required.
 
 ## Building
 
