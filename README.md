@@ -67,6 +67,8 @@ Edit `config/bridges_v2.keymap`:
   `require-prior-idle-ms` in `lhm`/`rhm`
 - Text movement thresholds: `horizontal-threshold` and `vertical-threshold`
   on `zpt_text_nav` (lower is faster)
+- Text gesture classification: `activation-distance`,
+  `engage-ratio-percent`, and `idle-timeout-ms` on `zpt_text_nav`
 - scroll speed: `scale-multiplier` / `scale-divisor` on `zpt_right_scroll`
 - scroll coalescing: `report-interval-ms` on `zpt_right_scroll`
 - adaptive axis intent: `engage-ratio-percent`, `release-ratio-percent`, and
@@ -78,6 +80,9 @@ left-trackball physical keypress guard can also be previewed at runtime from
 the local tuner. Runtime previews are validated and held only in RAM; reset
 them from the page or reboot to restore these Git-tracked defaults. The left
 guard currently defaults to the tested 40 ms threshold.
+
+The current tested Text defaults are 75-count horizontal and vertical steps,
+35-count activation distance, a 150% engage ratio, and a 40 ms idle timeout.
 
 The reusable Scroll and Text processors live in the separately pinned
 `zmk-pointing-tools` module. Text locks one physical axis for each gesture;
