@@ -223,6 +223,27 @@
         label = "Right output";
     };
 
+    /* Keep the initial compiled behavior as an exact pass-through. The local
+     * tuner can enable and refine qualification without reflashing; tested
+     * values can then replace these Git-tracked defaults. */
+    zpt_right_cursor_noise: zpt_right_cursor_noise {
+        compatible = "measlesbagel,zpt-input-processor-noise-filter";
+        #input-processor-cells = <0>;
+        tuning-id = "right-cursor-noise";
+        tuning-label = "Right cursor noise filter";
+        activation-distance = <6>;
+        coherence-percent = <60>;
+        qualification-timeout-ms = <160>;
+        idle-timeout-ms = <120>;
+        suppress-after-keypress-ms = <40>;
+    };
+
+    zpt_right_cursor_noise_output: zpt_right_cursor_noise_output {
+        compatible = "zmk,input-listener";
+        device = <&zpt_right_cursor_noise>;
+        input-processors = <&zpt_right_output>;
+    };
+
     zpt_left_raw: zpt_left_raw {
         compatible = "measlesbagel,zpt-input-processor-trace";
         #input-processor-cells = <0>;
@@ -308,7 +329,7 @@
 };
 
 &trackball_central_listener {
-    input-processors = <&zpt_right_raw>, <&zip_central_ball>, <&zpt_right_output>;
+    input-processors = <&zpt_right_raw>, <&zip_central_ball>, <&zpt_right_cursor_noise>;
 
     text_mode {
         layers = <TEXT>;
