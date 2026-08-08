@@ -90,9 +90,12 @@ its independent step thresholds no longer bias that initial axis decision.
 
 ## Pointing telemetry and runtime tuning
 
-The central firmware advertises raw and processed streams plus temporary scroll
-and text-navigation tuning targets through `zmk-pointing-tools`. Connect the
-right half over USB, then run the local tuner from a sibling checkout:
+The central firmware advertises raw and processed streams plus temporary
+scroll, text-navigation, and right-cursor noise-filter tuning targets through
+`zmk-pointing-tools`. The cursor filter is compiled in pass-through mode so it
+can first be enabled and evaluated without changing the default pointer
+behavior. Connect the right half over USB, then run the local tuner from a
+sibling checkout:
 
 ```console
 cd ../zmk-pointing-tools
@@ -100,7 +103,8 @@ devenv up
 ```
 
 Open <http://localhost:8787> in desktop Chrome. The page discovers `Left
-scroll`, `Right scroll`, and `Text navigation` independently. It can preview
+scroll`, `Right scroll`, `Text navigation`, and `Right cursor noise filter`
+independently. It can preview
 scroll scale/filtering, text step distances, axis intent, timing, and the
 keypress guard. Stable `tuning-id` values allow versioned profiles to be
 exported and imported without depending on boot-time target order. **Copy
