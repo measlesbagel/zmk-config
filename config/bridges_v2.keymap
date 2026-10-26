@@ -5,6 +5,7 @@
 #include <dt-bindings/zmk/outputs.h>
 #include <dt-bindings/zmk/pointing.h>
 #include <dt-bindings/zmk/pointing_tools.h>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
 
 /*
  * Physical positions (54-key layout):
@@ -32,24 +33,6 @@
 #define EDIT_CUT   &kp LC(X)
 #define EDIT_COPY  &kp LC(C)
 #define EDIT_PASTE &kp LC(V)
-
-/* CPI controls only exist on the right/central firmware. The corresponding
- * physical positions do not exist on the left half anyway. */
-#if defined(BRIDGES_RIGHT_CONFIG)
-#define CPI_600  &cpi_set_r 608 1
-#define CPI_700  &cpi_set_r 684 1
-#define CPI_800  &cpi_set_r 798 1
-#define CPI_900  &cpi_set_r 912 1
-#define CPI_1000 &cpi_set_r 988 1
-#define CPI_1200 &cpi_set_r 1216 1
-#else
-#define CPI_600  &none
-#define CPI_700  &none
-#define CPI_800  &none
-#define CPI_900  &none
-#define CPI_1000 &none
-#define CPI_1200 &none
-#endif
 
 #if defined(BRIDGES_RIGHT_CONFIG)
 #define ADMIN_OUTPUT &out OUT_TOG
@@ -103,22 +86,6 @@
             quick-tap-ms = <175>;
             bindings = <&mo>, <&kp>;
         };
-    };
-
-    /* Horizontal and vertical step distances remain independent; axis intent
-     * is selected from physical gesture geometry before either is applied. */
-    zpt_text_nav: zpt_text_nav {
-        compatible = "measlesbagel,zpt-input-processor-text-nav";
-        #input-processor-cells = <0>;
-        tuning-id = "text-navigation";
-        tuning-label = "Text navigation";
-        horizontal-threshold = <75>;
-        vertical-threshold = <75>;
-        bindings = <&kp LEFT>, <&kp RIGHT>, <&kp UP>, <&kp DOWN>;
-        tap-ms = <5>;
-        idle-timeout-ms = <40>;
-        activation-distance = <35>;
-        engage-ratio-percent = <150>;
     };
 
     keymap {
@@ -195,7 +162,7 @@
         admin_layer {
             display-name = "Admin";
             bindings = <
-                &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &bt BT_CLR   CPI_600 CPI_700 CPI_800 CPI_900 CPI_1000 CPI_1200
+                &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &bt BT_CLR   &none &none &none &none &none &none
                 &none &none &none &none &none &none   &none &none &none &none &none &none
                 &none &kp LGUI &kp LALT &kp LCTRL &kp LSHFT &none   &kp C_MUTE &kp C_PREV &kp C_VOL_DN &kp C_VOL_UP &kp C_NEXT &none
                 ADMIN_OUTPUT &none &none &none &none &none   &kp C_STOP &kp C_PP &none &none &none &none
@@ -205,120 +172,448 @@
     };
 };
 
-#if defined(BRIDGES_RIGHT_CONFIG)
+/*
+ * Pointing runs on ZMK Pointing Tools pipelines on the central.
+ *
+ * Right ball (central): one router with cursor, scroll, text, and sniper
+ * pipelines, selected by layer. Left ball (peripheral): compact split frames
+ * into a router whose only pipeline is guarded adaptive scrolling.
+ *
+ * Distances are physical (micrometres, steps per metre), so changing CPI
+ * from the tuner changes cursor speed only. Every tunable stage can be
+ * previewed live and calibrated per ball from the local web tuner; its
+ * Copy config output hands tested values back to this file.
+ *
+ * Unless noted, values reproduce the previous processor configuration at
+ * the PAW3222's real 684 CPI (its driver applies multiples of 38).
+ */
 / {
-    zpt_right_raw: zpt_right_raw {
-        compatible = "measlesbagel,zpt-input-processor-trace";
-        #input-processor-cells = <0>;
-        pointing-device-id = <1>;
-        stage = <0>;
-        label = "Right raw";
+    /* Physical pointing devices, declared identically on both halves so
+     * device ids agree. Each half adds its own sensor at the end of this
+     * file. */
+    zpt_right_ball: zpt_right_ball {
+        compatible = "measlesbagel,zpt-pointing-device";
+        stable-id = "right-ball";
+        resolution-cpi = <684>;
+        cpi-min = <608>;
+        cpi-max = <4826>;
+        cpi-step = <38>;
     };
 
-    zpt_right_output: zpt_right_output {
-        compatible = "measlesbagel,zpt-input-processor-trace";
-        #input-processor-cells = <0>;
-        pointing-device-id = <1>;
-        stage = <1>;
-        label = "Right output";
+    zpt_left_ball: zpt_left_ball {
+        compatible = "measlesbagel,zpt-pointing-device";
+        stable-id = "left-ball";
+        location = <1>;
+        resolution-cpi = <684>;
+        cpi-min = <608>;
+        cpi-max = <4826>;
+        cpi-step = <38>;
     };
 
-    /* Keep the initial compiled behavior as an exact pass-through. The local
-     * tuner can enable and refine qualification without reflashing; tested
-     * values can then replace these Git-tracked defaults. */
-    zpt_right_cursor_noise: zpt_right_cursor_noise {
-        compatible = "measlesbagel,zpt-input-processor-noise-filter";
-        #input-processor-cells = <0>;
-        tuning-id = "right-cursor-noise";
-        tuning-label = "Right cursor noise filter";
-        activation-distance = <6>;
+    /* Left scrolling ignores movement briefly after physical key presses,
+     * preserving fine trackball motion while rejecting typing shake. */
+    zpt_keypress_guard: zpt_keypress_guard {
+        compatible = "measlesbagel,zpt-keypress-suppression";
+        suppress-after-keypress-ms = <40>;
+    };
+
+    /* ---- Right cursor (default) ------------------------------------- */
+
+    zpt_right_cursor_orientation: zpt_right_cursor_orientation {
+        compatible = "measlesbagel,zpt-stage-orientation";
+        stable-id = "right-cursor-orientation";
+        invert-x;
+        invert-y;
+    };
+
+    zpt_right_cursor_normalize: zpt_right_cursor_normalize {
+        compatible = "measlesbagel,zpt-stage-resolution-normalize";
+        stable-id = "right-cursor-normalize";
+    };
+
+    /* Compiled as a pass-through, like the previous noise filter. Enable and
+     * refine it from the tuner, then copy the values here. */
+    zpt_right_cursor_gate: zpt_right_cursor_gate {
+        compatible = "measlesbagel,zpt-stage-coherent-displacement";
+        stable-id = "right-cursor-gate";
+        activation-distance-micrometers = <223>;
         coherence-percent = <60>;
         qualification-timeout-ms = <160>;
         idle-timeout-ms = <120>;
-        suppress-after-keypress-ms = <40>;
     };
 
-    zpt_right_cursor_noise_output: zpt_right_cursor_noise_output {
-        compatible = "zmk,input-listener";
-        device = <&zpt_right_cursor_noise>;
-        input-processors = <&zpt_right_output>;
+    /* New: slow movement keeps today's 1:1 feel, fast flicks reach double
+     * speed. A starting point to tune and calibrate on the keyboard. */
+    zpt_right_cursor_acceleration: zpt_right_cursor_acceleration {
+        compatible = "measlesbagel,zpt-stage-cursor-acceleration";
+        stable-id = "right-cursor-acceleration";
+        slow-speed-mm-per-s = <25>;
+        fast-speed-mm-per-s = <250>;
+        slow-gain-percent = <100>;
+        fast-gain-percent = <200>;
     };
 
-    zpt_left_raw: zpt_left_raw {
-        compatible = "measlesbagel,zpt-input-processor-trace";
+    zpt_right_cursor_transfer: zpt_right_cursor_transfer {
+        compatible = "measlesbagel,zpt-stage-cursor-transfer";
+        stable-id = "right-cursor-transfer";
+        scale-multiplier = <1>;
+        scale-divisor = <1>;
+    };
+
+    zpt_right_cursor_quantizer: zpt_right_cursor_quantizer {
+        compatible = "measlesbagel,zpt-stage-cursor-quantizer";
+        stable-id = "right-cursor-quantizer";
+    };
+
+    /* Replaces the 4 ms report rate limit without dropping distance. */
+    zpt_right_cursor_coalescer: zpt_right_cursor_coalescer {
+        compatible = "measlesbagel,zpt-stage-cursor-coalescer";
+        stable-id = "right-cursor-coalescer";
+        report-interval-ms = <4>;
+    };
+
+    zpt_right_cursor_out: zpt_right_cursor_out {
+        compatible = "measlesbagel,zpt-sink-cursor";
+        stable-id = "right-cursor-out";
+    };
+
+    zpt_right_cursor: zpt_right_cursor {
+        compatible = "measlesbagel,zpt-pipeline";
+        stable-id = "right-cursor";
+        stages = <&zpt_right_cursor_orientation &zpt_right_cursor_normalize
+                  &zpt_right_cursor_gate &zpt_right_cursor_acceleration
+                  &zpt_right_cursor_transfer &zpt_right_cursor_quantizer
+                  &zpt_right_cursor_coalescer>;
+        sink = <&zpt_right_cursor_out>;
+    };
+
+    /* ---- Right scroll (Scroll layer) -------------------------------- */
+
+    zpt_right_scroll_orientation: zpt_right_scroll_orientation {
+        compatible = "measlesbagel,zpt-stage-orientation";
+        stable-id = "right-scroll-orientation";
+        invert-x;
+        invert-y;
+    };
+
+    zpt_right_scroll_normalize: zpt_right_scroll_normalize {
+        compatible = "measlesbagel,zpt-stage-resolution-normalize";
+        stable-id = "right-scroll-normalize";
+    };
+
+    zpt_right_scroll_intent: zpt_right_scroll_intent {
+        compatible = "measlesbagel,zpt-stage-axis-intent";
+        stable-id = "right-scroll-intent";
+        policy = <ZPT_AXIS_ADAPTIVE>;
+        engage-ratio-percent = <300>;
+        release-ratio-percent = <180>;
+        activation-distance-micrometers = <594>;
+        window-ms = <64>;
+        idle-timeout-ms = <120>;
+    };
+
+    zpt_right_scroll_constraint: zpt_right_scroll_constraint {
+        compatible = "measlesbagel,zpt-stage-axis-constraint";
+        stable-id = "right-scroll-constraint";
+        idle-timeout-ms = <120>;
+        fold-interval-ms = <16>;
+    };
+
+    /* The previous 1/8 wheel step per count. */
+    zpt_right_scroll_batcher: zpt_right_scroll_batcher {
+        compatible = "measlesbagel,zpt-stage-scroll-batcher";
+        stable-id = "right-scroll-batcher";
+        steps-per-meter = <3366>;
+        report-interval-ms = <16>;
+    };
+
+    zpt_right_scroll_out: zpt_right_scroll_out {
+        compatible = "measlesbagel,zpt-sink-scroll";
+        stable-id = "right-scroll-out";
+    };
+
+    zpt_right_scroll: zpt_right_scroll {
+        compatible = "measlesbagel,zpt-pipeline";
+        stable-id = "right-scroll";
+        stages = <&zpt_right_scroll_orientation &zpt_right_scroll_normalize
+                  &zpt_right_scroll_intent &zpt_right_scroll_constraint
+                  &zpt_right_scroll_batcher>;
+        sink = <&zpt_right_scroll_out>;
+    };
+
+    /* ---- Right text navigation (Text layer) ------------------------- */
+
+    zpt_right_text_orientation: zpt_right_text_orientation {
+        compatible = "measlesbagel,zpt-stage-orientation";
+        stable-id = "right-text-orientation";
+        invert-x;
+        invert-y;
+    };
+
+    zpt_right_text_normalize: zpt_right_text_normalize {
+        compatible = "measlesbagel,zpt-stage-resolution-normalize";
+        stable-id = "right-text-normalize";
+    };
+
+    zpt_right_text_intent: zpt_right_text_intent {
+        compatible = "measlesbagel,zpt-stage-axis-intent";
+        stable-id = "right-text-intent";
+        policy = <ZPT_AXIS_ADAPTIVE>;
+        engage-ratio-percent = <150>;
+        release-ratio-percent = <100>;
+        activation-distance-micrometers = <1300>;
+        window-ms = <32>;
+        idle-timeout-ms = <40>;
+    };
+
+    zpt_right_text_constraint: zpt_right_text_constraint {
+        compatible = "measlesbagel,zpt-stage-axis-constraint";
+        stable-id = "right-text-constraint";
+        discard-unclassified;
+        idle-timeout-ms = <40>;
+    };
+
+    /* Horizontal and vertical steps stay independent; axis intent is chosen
+     * from gesture geometry before either applies. */
+    zpt_right_text_nav: zpt_right_text_nav {
+        compatible = "measlesbagel,zpt-stage-text-nav";
+        stable-id = "right-text-nav";
+        horizontal-threshold-micrometers = <2785>;
+        vertical-threshold-micrometers = <2785>;
+        idle-timeout-ms = <40>;
+    };
+
+    zpt_right_text_out: zpt_right_text_out {
+        compatible = "measlesbagel,zpt-sink-action";
+        stable-id = "right-text-out";
+        bindings = <&kp LEFT>, <&kp RIGHT>, <&kp UP>, <&kp DOWN>;
+        tap-ms = <5>;
+    };
+
+    zpt_right_text: zpt_right_text {
+        compatible = "measlesbagel,zpt-pipeline";
+        stable-id = "right-text";
+        stages = <&zpt_right_text_orientation &zpt_right_text_normalize
+                  &zpt_right_text_intent &zpt_right_text_constraint
+                  &zpt_right_text_nav>;
+        sink = <&zpt_right_text_out>;
+    };
+
+    /* ---- Right sniper (Sniper layer) -------------------------------- */
+
+    zpt_right_sniper_orientation: zpt_right_sniper_orientation {
+        compatible = "measlesbagel,zpt-stage-orientation";
+        stable-id = "right-sniper-orientation";
+        invert-x;
+        invert-y;
+    };
+
+    zpt_right_sniper_normalize: zpt_right_sniper_normalize {
+        compatible = "measlesbagel,zpt-stage-resolution-normalize";
+        stable-id = "right-sniper-normalize";
+    };
+
+    zpt_right_sniper_transfer: zpt_right_sniper_transfer {
+        compatible = "measlesbagel,zpt-stage-cursor-transfer";
+        stable-id = "right-sniper-transfer";
+        scale-multiplier = <1>;
+        scale-divisor = <4>;
+    };
+
+    zpt_right_sniper_quantizer: zpt_right_sniper_quantizer {
+        compatible = "measlesbagel,zpt-stage-cursor-quantizer";
+        stable-id = "right-sniper-quantizer";
+    };
+
+    zpt_right_sniper_coalescer: zpt_right_sniper_coalescer {
+        compatible = "measlesbagel,zpt-stage-cursor-coalescer";
+        stable-id = "right-sniper-coalescer";
+        report-interval-ms = <4>;
+    };
+
+    zpt_right_sniper_out: zpt_right_sniper_out {
+        compatible = "measlesbagel,zpt-sink-cursor";
+        stable-id = "right-sniper-out";
+    };
+
+    zpt_right_sniper: zpt_right_sniper {
+        compatible = "measlesbagel,zpt-pipeline";
+        stable-id = "right-sniper";
+        stages = <&zpt_right_sniper_orientation &zpt_right_sniper_normalize
+                  &zpt_right_sniper_transfer &zpt_right_sniper_quantizer
+                  &zpt_right_sniper_coalescer>;
+        sink = <&zpt_right_sniper_out>;
+    };
+
+    zpt_right_router: zpt_right_router {
+        compatible = "measlesbagel,zpt-router";
+        stable-id = "right-router";
+        pipelines = <&zpt_right_cursor &zpt_right_scroll &zpt_right_text &zpt_right_sniper>;
+        default-pipeline = <&zpt_right_cursor>;
+
+        scroll {
+            layers = <SCROLL>;
+            pipeline = <&zpt_right_scroll>;
+        };
+
+        text {
+            layers = <TEXT>;
+            pipeline = <&zpt_right_text>;
+        };
+
+        sniper {
+            layers = <SNIPER>;
+            pipeline = <&zpt_right_sniper>;
+        };
+    };
+
+    zpt_right_source: zpt_right_source {
+        compatible = "measlesbagel,zpt-input-processor-source";
         #input-processor-cells = <0>;
-        pointing-device-id = <0>;
-        stage = <0>;
-        label = "Left raw";
+        source-id = <1>;
+        device = <&zpt_right_ball>;
+        router = <&zpt_right_router>;
+    };
+
+    zpt_right_output: zpt_right_output {
+        compatible = "zmk,input-listener";
+        device = <&zpt_right_router>;
+    };
+
+    /* ---- Left scroll (always) --------------------------------------- */
+
+    /* The left sensor is mounted unrotated, so it needs no orientation. */
+    zpt_left_scroll_normalize: zpt_left_scroll_normalize {
+        compatible = "measlesbagel,zpt-stage-resolution-normalize";
+        stable-id = "left-scroll-normalize";
+    };
+
+    zpt_left_scroll_intent: zpt_left_scroll_intent {
+        compatible = "measlesbagel,zpt-stage-axis-intent";
+        stable-id = "left-scroll-intent";
+        policy = <ZPT_AXIS_ADAPTIVE>;
+        engage-ratio-percent = <300>;
+        release-ratio-percent = <180>;
+        activation-distance-micrometers = <594>;
+        window-ms = <64>;
+        idle-timeout-ms = <120>;
+        suppression = <&zpt_keypress_guard>;
+    };
+
+    /* Frames arrive already coalesced to 16 ms, so undecided motion folds
+     * and reports go out on the next millisecond, as before. */
+    zpt_left_scroll_constraint: zpt_left_scroll_constraint {
+        compatible = "measlesbagel,zpt-stage-axis-constraint";
+        stable-id = "left-scroll-constraint";
+        idle-timeout-ms = <120>;
+        fold-interval-ms = <1>;
+        suppression = <&zpt_keypress_guard>;
+    };
+
+    /* The previous 7/16 wheel step per count, measured for the
+     * non-dominant hand. Recalibrate it from the tuner. */
+    zpt_left_scroll_batcher: zpt_left_scroll_batcher {
+        compatible = "measlesbagel,zpt-stage-scroll-batcher";
+        stable-id = "left-scroll-batcher";
+        steps-per-meter = <11781>;
+        report-interval-ms = <1>;
+        suppression = <&zpt_keypress_guard>;
+    };
+
+    zpt_left_scroll_out: zpt_left_scroll_out {
+        compatible = "measlesbagel,zpt-sink-scroll";
+        stable-id = "left-scroll-out";
+    };
+
+    zpt_left_scroll: zpt_left_scroll {
+        compatible = "measlesbagel,zpt-pipeline";
+        stable-id = "left-scroll";
+        stages = <&zpt_left_scroll_normalize &zpt_left_scroll_intent
+                  &zpt_left_scroll_constraint &zpt_left_scroll_batcher>;
+        sink = <&zpt_left_scroll_out>;
+    };
+
+    zpt_left_router: zpt_left_router {
+        compatible = "measlesbagel,zpt-router";
+        stable-id = "left-router";
+        pipelines = <&zpt_left_scroll>;
+        default-pipeline = <&zpt_left_scroll>;
+    };
+
+    /* Decodes the left half's compact split frames (see the encoder at the
+     * end of this file). The event codes must match. */
+    zpt_left_source: zpt_left_source {
+        compatible = "measlesbagel,zpt-input-processor-source";
+        #input-processor-cells = <0>;
+        source-id = <0>;
+        device = <&zpt_left_ball>;
+        router = <&zpt_left_router>;
+        transported;
+        compact-event-code = <INPUT_REL_Z>;
+        compact-transport-coalesced;
     };
 
     zpt_left_output: zpt_left_output {
-        compatible = "measlesbagel,zpt-input-processor-trace";
-        #input-processor-cells = <0>;
-        pointing-device-id = <0>;
-        stage = <1>;
-        label = "Left output";
-    };
-
-    zpt_left_sign_extend: zpt_left_sign_extend {
-        compatible = "measlesbagel,zpt-input-processor-sign-extend-xy";
-        #input-processor-cells = <0>;
-    };
-
-    /* The processor is also a virtual input device. Its dedicated listener
-     * receives coalesced horizontal/vertical wheel frames. */
-    zpt_right_scroll: zpt_right_scroll {
-        compatible = "measlesbagel,zpt-input-processor-scroll";
-        #input-processor-cells = <1>;
-        tuning-id = "right-scroll";
-        tuning-label = "Right scroll";
-        scale-multiplier = <1>;
-        scale-divisor = <8>;
-        report-interval-ms = <16>;
-        idle-timeout-ms = <120>;
-        intent-window-ms = <64>;
-        activation-distance = <16>;
-        engage-ratio-percent = <300>;
-        release-ratio-percent = <180>;
-    };
-
-    zpt_right_scroll_output: zpt_right_scroll_output {
         compatible = "zmk,input-listener";
-        device = <&zpt_right_scroll>;
-        input-processors = <&zpt_right_output>;
+        device = <&zpt_left_router>;
     };
 
-    /* Dedicated left scrolling ignores movement briefly after physical key
-     * presses, preserving fine trackball motion while rejecting typing shake. */
-    zpt_left_scroll: zpt_left_scroll {
-        compatible = "measlesbagel,zpt-input-processor-scroll";
-        #input-processor-cells = <1>;
-        tuning-id = "left-scroll";
-        tuning-label = "Left scroll";
-        /* Left split frames are already coalesced to 16 ms for BLE transport.
-         * The 7/16 gain normalizes the measured non-dominant-hand distance. */
-        scale-multiplier = <7>;
-        scale-divisor = <16>;
-        report-interval-ms = <1>;
-        idle-timeout-ms = <120>;
-        intent-window-ms = <64>;
-        activation-distance = <16>;
-        engage-ratio-percent = <300>;
-        release-ratio-percent = <180>;
-        suppress-after-keypress-ms = <40>;
+    zpt_compact_encoder: zpt_compact_encoder {
+        compatible = "measlesbagel,zpt-input-processor-compact-split-encoder";
+        #input-processor-cells = <0>;
+        event-code = <INPUT_REL_Z>;
     };
 
-    zpt_left_scroll_output: zpt_left_scroll_output {
-        compatible = "zmk,input-listener";
-        device = <&zpt_left_scroll>;
-        input-processors = <&zpt_left_output>;
+    /* ---- Split sensor-control tunnel -------------------------------- */
+
+    /* Lets the tuner read and preview the left ball's CPI through the
+     * central. The agent's node name must stay within 8 characters. */
+    zpt_cpi: zpt_cpi {
+        compatible = "measlesbagel,zpt-sensor-control";
+        #binding-cells = <0>;
     };
 
+    split_inputs {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        /* reg 0 is the left trackball's split input. */
+        zpt_cpi_split: zpt_cpi_split@1 {
+            compatible = "zmk,input-split";
+            reg = <1>;
+            device = <&zpt_cpi>;
+        };
+    };
+
+    zpt_cpi_proxy {
+        compatible = "measlesbagel,zpt-sensor-control-proxy";
+        agent = <&zpt_cpi>;
+        input = <&zpt_cpi_split>;
+    };
+};
+
+/* CPI is changed from the tuner through the device table, which keeps every
+ * distance-based setting correct. The inherited CPI behaviors would change
+ * the sensor behind the pipelines' back and reapply saved values at boot. */
+&dpi_cycle_left { status = "disabled"; };
+&dpi_cycle_right { status = "disabled"; };
+&cpi_set_l { status = "disabled"; };
+&cpi_set_r { status = "disabled"; };
+
+#if defined(BRIDGES_RIGHT_CONFIG)
+/ {
     zpt_telemetry {
         compatible = "measlesbagel,zpt-telemetry";
     };
 
-    /* Superseded by the read-only ZMK Pointing Tools telemetry service. */
+    /* Per-stage diagnostics and the tuner's calibration samples. */
+    zpt_pipeline_telemetry {
+        compatible = "measlesbagel,zpt-pipeline-telemetry";
+        pipelines = <&zpt_right_cursor &zpt_right_scroll &zpt_right_text
+                     &zpt_right_sniper &zpt_left_scroll>;
+    };
+
+    /* Superseded by the ZMK Pointing Tools telemetry service. */
     trackball_config {
         status = "disabled";
     };
@@ -328,55 +623,27 @@
     };
 };
 
-&trackball_central_listener {
-    input-processors = <&zpt_right_raw>, <&zip_central_ball>, <&zpt_right_cursor_noise>;
-
-    text_mode {
-        layers = <TEXT>;
-        input-processors
-            = <&zpt_right_raw>
-            , <&zip_xy_transform (INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>
-            , <&zpt_text_nav>;
-    };
-
-    scroll_mode {
-        layers = <SCROLL>;
-        input-processors
-            = <&zpt_right_raw>
-            , <&zip_xy_transform (INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>
-            , <&zpt_right_scroll ZPT_AXIS_ADAPTIVE>;
-    };
-
-    sniper_mode {
-        layers = <SNIPER>;
-        input-processors
-            = <&zpt_right_raw>
-            , <&zip_xy_transform (INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>
-            , <&zip_xy_scaler 1 4>
-            , <&zip_report_rate_limit 4>
-            , <&zpt_right_output>;
-    };
+&zpt_right_ball {
+    sensor = <&trackball_central>;
 };
 
-/* The peripheral sends raw left-ball vectors to the central. This listener
- * always converts them to guarded adaptive scrolling, independent of layers. */
+&trackball_central_listener {
+    input-processors = <&zpt_right_source>;
+};
+
 &trackball_peripheral_listener {
-    input-processors = <&zip_zxy>,
-                       <&zpt_left_sign_extend>,
-                       <&zpt_left_raw>,
-                       <&zpt_left_scroll ZPT_AXIS_ADAPTIVE>;
+    input-processors = <&zpt_left_source>;
 };
 #endif
 
-/* The left sensor is temporarily disabled while its processing path is moved
- * to the central so both trackballs can follow central layer state. */
 #if defined(BRIDGES_LEFT)
-&zpt_text_nav {
-    status = "disabled";
+&zpt_left_ball {
+    sensor = <&trackball_peripheral>;
 };
 
-&dpi_cycle_left { status = "disabled"; };
-&dpi_cycle_right { status = "disabled"; };
-&cpi_set_l { status = "disabled"; };
-&cpi_set_r { status = "disabled"; };
+/* Coalesce complete frames to 16 ms for BLE, then send each as one compact
+ * split event carrying exact signed counts, sequence, and timing. */
+&trackball_peripheral_split {
+    input-processors = <&zip_report_rate_limit 16>, <&zpt_compact_encoder>;
+};
 #endif
