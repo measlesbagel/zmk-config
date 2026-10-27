@@ -497,29 +497,29 @@
         stable-id = "left-scroll-normalize";
     };
 
-    /* Vertical only: typical left strokes (about 13 mm in 2 s) are too slow
-     * to reach the adaptive lock's activation distance, so they went out on
-     * both axes and each keypress reset the lock (see #21). The adaptive
-     * parameters are unused but required by the binding. */
+    /* Same adaptive lock as the right ball, but left strokes are slower
+     * (about 6.5 mm/s against about 40 mm/s on the right when calibrated),
+     * so the activation distance is scaled down for them to lock an axis
+     * instead of going out undecided on both axes (see #21). */
     zpt_left_scroll_intent: zpt_left_scroll_intent {
         compatible = "measlesbagel,zpt-stage-axis-intent";
         stable-id = "left-scroll-intent";
-        policy = <ZPT_AXIS_VERTICAL>;
+        policy = <ZPT_AXIS_ADAPTIVE>;
         engage-ratio-percent = <300>;
         release-ratio-percent = <180>;
-        activation-distance-micrometers = <594>;
+        activation-distance-micrometers = <150>;
         window-ms = <64>;
         idle-timeout-ms = <120>;
         suppression = <&zpt_keypress_guard>;
     };
 
-    /* Frames arrive once per 8 ms sensor read, so undecided motion folds
-     * and reports go out on the next millisecond. */
+    /* Timing matches the right ball: undecided motion is held up to 16 ms
+     * so it can go out along the axis that locks. */
     zpt_left_scroll_constraint: zpt_left_scroll_constraint {
         compatible = "measlesbagel,zpt-stage-axis-constraint";
         stable-id = "left-scroll-constraint";
         idle-timeout-ms = <120>;
-        fold-interval-ms = <1>;
+        fold-interval-ms = <16>;
         suppression = <&zpt_keypress_guard>;
     };
 
@@ -529,7 +529,7 @@
         compatible = "measlesbagel,zpt-stage-scroll-batcher";
         stable-id = "left-scroll-batcher";
         steps-per-meter = <11781>;
-        report-interval-ms = <1>;
+        report-interval-ms = <16>;
         suppression = <&zpt_keypress_guard>;
     };
 
