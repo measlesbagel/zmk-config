@@ -497,10 +497,14 @@
         stable-id = "left-scroll-normalize";
     };
 
+    /* Vertical only: typical left strokes (about 13 mm in 2 s) are too slow
+     * to reach the adaptive lock's activation distance, so they went out on
+     * both axes and each keypress reset the lock (see #21). The adaptive
+     * parameters are unused but required by the binding. */
     zpt_left_scroll_intent: zpt_left_scroll_intent {
         compatible = "measlesbagel,zpt-stage-axis-intent";
         stable-id = "left-scroll-intent";
-        policy = <ZPT_AXIS_ADAPTIVE>;
+        policy = <ZPT_AXIS_VERTICAL>;
         engage-ratio-percent = <300>;
         release-ratio-percent = <180>;
         activation-distance-micrometers = <594>;
