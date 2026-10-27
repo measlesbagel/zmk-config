@@ -509,8 +509,8 @@
         suppression = <&zpt_keypress_guard>;
     };
 
-    /* Frames arrive already coalesced to 16 ms, so undecided motion folds
-     * and reports go out on the next millisecond, as before. */
+    /* Frames arrive once per 8 ms sensor read, so undecided motion folds
+     * and reports go out on the next millisecond. */
     zpt_left_scroll_constraint: zpt_left_scroll_constraint {
         compatible = "measlesbagel,zpt-stage-axis-constraint";
         stable-id = "left-scroll-constraint";
@@ -559,7 +559,6 @@
         router = <&zpt_left_router>;
         transported;
         compact-event-code = <INPUT_REL_Z>;
-        compact-transport-coalesced;
     };
 
     zpt_left_output: zpt_left_output {
@@ -650,9 +649,10 @@
     sensor = <&trackball_peripheral>;
 };
 
-/* Coalesce complete frames to 16 ms for BLE, then send each as one compact
- * split event carrying exact signed counts, sequence, and timing. */
+/* Send each sensor read as one compact split event carrying exact signed
+ * counts, sequence, and timing. The driver reads every 8 ms while the ball
+ * moves, and the 7.5 ms split link carries each read as it comes. */
 &trackball_peripheral_split {
-    input-processors = <&zip_report_rate_limit 16>, <&zpt_compact_encoder>;
+    input-processors = <&zpt_compact_encoder>;
 };
 #endif
