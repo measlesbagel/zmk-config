@@ -74,12 +74,13 @@ Edit `config/bridges_v2.keymap`:
   `require-prior-idle-ms` in `lhm`/`rhm`
 - cursor gain: `scale-multiplier` / `scale-divisor` on
   `zpt_right_cursor_transfer`, and the acceleration curve on
-  `zpt_right_cursor_acceleration` (slow and fast speeds in mm/s, gains in
-  percent)
+  `zpt_right_cursor_acceleration` (eight points of ball speed in mm/s and
+  sensitivity in percent, plus the speed estimate's rise and fall times)
 - cursor noise gate: `zpt_right_cursor_gate`, compiled as a pass-through until
   `enabled` is added
-- cursor report coalescing: `report-interval-ms` on
-  `zpt_right_cursor_coalescer`
+- cursor report coalescing: `usb-report-interval-ms` and
+  `ble-report-interval-ms` on `zpt_right_cursor_coalescer` and
+  `zpt_right_sniper_coalescer`
 - sniper speed: `scale-divisor` on `zpt_right_sniper_transfer`
 - scroll speed: `steps-per-meter` on `zpt_right_scroll_batcher` and
   `zpt_left_scroll_batcher`

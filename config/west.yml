@@ -48,7 +48,7 @@ manifest:
     # the top of the unmerged feature stack until it lands on main.
     - name: zmk-pointing-tools
       remote: measlesbagel
-      revision: e0850340f323b80c758e4b8f7fd91fa01c5c411b
+      revision: ea661784ea506cadc91fb82d5143c97e5e8ff9f4
       path: modules/zmk-pointing-tools
 
     # Pointing-device support used by the Bridges V2 trackball pipelines.
