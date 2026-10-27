@@ -269,13 +269,15 @@
     };
 
     /* Replaces the 4 ms report rate limit without dropping distance. The
-     * interval follows the active output; both links keep the previous 4 ms
-     * here, and USB can go as low as 1 ms. */
+     * interval follows the active output. USB keeps the previous 4 ms and
+     * can go as low as 1 ms. Bluetooth sends every 8 ms, just slower than
+     * the 7.5 ms connection interval the board asks hosts for, so reports
+     * don't queue up. */
     zpt_right_cursor_coalescer: zpt_right_cursor_coalescer {
         compatible = "measlesbagel,zpt-stage-cursor-coalescer";
         stable-id = "right-cursor-coalescer";
         usb-report-interval-ms = <4>;
-        ble-report-interval-ms = <4>;
+        ble-report-interval-ms = <8>;
     };
 
     zpt_right_cursor_out: zpt_right_cursor_out {
@@ -435,7 +437,7 @@
         compatible = "measlesbagel,zpt-stage-cursor-coalescer";
         stable-id = "right-sniper-coalescer";
         usb-report-interval-ms = <4>;
-        ble-report-interval-ms = <4>;
+        ble-report-interval-ms = <8>;
     };
 
     zpt_right_sniper_out: zpt_right_sniper_out {
