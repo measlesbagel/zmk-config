@@ -44,11 +44,10 @@ manifest:
       revision: 12bdbfcabf05d619605de59b08243274b7932c66
       path: modules/bridges-v2-zmk-firmware
 
-    # Reusable pointing processors and host tuning infrastructure. Pinned to
-    # the top of the unmerged feature stack (#103) until it lands on main.
+    # Reusable pointing processors and host tuning infrastructure.
     - name: zmk-pointing-tools
       remote: measlesbagel
-      revision: f82193d04bbf397fc155dff28771c59d8060316d
+      revision: c33a2abda45122454b2eca0c406554b331081e67
       path: modules/zmk-pointing-tools
 
     # Pointing-device support used by the Bridges V2 trackball pipelines.
