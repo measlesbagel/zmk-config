@@ -41,8 +41,8 @@ tuner's Calibration panel.
 
 Both balls run on `zmk-pointing-tools` pipelines on the central: one router
 per ball, with the right ball's pipeline chosen by the active layer. The left
-half sends each coalesced 16 ms frame to the central as one compact split
-event, so the central sees exact signed counts with sequence and timing.
+half sends each sensor read to the central as one compact split event, so
+the central sees exact signed counts with sequence and timing.
 Distances are physical (micrometres and steps per metre), so changing CPI
 changes cursor speed without changing scroll speed, text steps, or the
 motion gate.
