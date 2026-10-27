@@ -28,15 +28,24 @@ vibration without imposing a scroll dead zone.
 
 | State | Behavior |
 | --- | --- |
-| Default | Cursor; ordinary typing keys are never remapped automatically |
+| Default | Cursor with speed-based acceleration; ordinary typing keys are never remapped automatically |
 | Hold Tab | Coalesced adaptive vertical/horizontal scrolling |
 | Hold Esc | Trackball arrows; physical `N/E/I/O` are left/down/up/right |
 | Hold Space | Quarter-speed cursor with the mirrored click keys |
 
 The left trackball remains adaptive scroll in every state, including while a
 right-trackball mode is held. Holding Tab therefore makes both balls scroll.
-Its gain is calibrated independently because equal repeated gestures produced
-substantially less raw distance with the left hand.
+Its gain is set independently because equal repeated gestures produced
+substantially less raw distance with the left hand; recalibrate it from the
+tuner's Calibration panel.
+
+Both balls run on `zmk-pointing-tools` pipelines on the central: one router
+per ball, with the right ball's pipeline chosen by the active layer. The left
+half sends each sensor read to the central as one compact split event, so
+the central sees exact signed counts with sequence and timing.
+Distances are physical (micrometres and steps per metre), so changing CPI
+changes cursor speed without changing scroll speed, text steps, or the
+motion gate.
 
 Text, Scroll, and Sniper also provide `Q/Z/X/C/V` as
 Redo/Undo/Cut/Copy/Paste. Held Shift combines with those shortcuts for terminal
@@ -44,14 +53,12 @@ copy/paste. Text uses only the left home-row modifiers and disables unrelated
 keys.
 
 Hold Enter or Backspace for stripped canonical Miryoku Sym and Num layers.
-Hold Delete for Bluetooth profiles, media controls, USB/BLE output toggle,
-and persistent right-trackball CPI presets.
+Hold Delete for Bluetooth profiles, media controls, and the USB/BLE output
+toggle.
 
 ### Admin controls
 
 - Left number row: Bluetooth profiles 0-4 and clear.
-- Right number row: approximately 600/700/800/900/1000/1200 CPI (the exact
-  PAW3222 values are 608/684/798/912/988/1216).
 - Right home: mute, previous, volume down/up, and next.
 - Right bottom: stop and play/pause.
 - Left outer-bottom key: output toggle.
@@ -65,55 +72,56 @@ Edit `config/bridges_v2.keymap`:
 
 - home-row mod timing: `tapping-term-ms`, `quick-tap-ms`, and
   `require-prior-idle-ms` in `lhm`/`rhm`
-- Text movement thresholds: `horizontal-threshold` and `vertical-threshold`
-  on `zpt_text_nav` (lower is faster)
-- Text gesture classification: `activation-distance`,
-  `engage-ratio-percent`, and `idle-timeout-ms` on `zpt_text_nav`
-- scroll speed: `scale-multiplier` / `scale-divisor` on `zpt_right_scroll`
-- scroll coalescing: `report-interval-ms` on `zpt_right_scroll`
-- adaptive axis intent: `engage-ratio-percent`, `release-ratio-percent`, and
-  `intent-window-ms` on `zpt_right_scroll`
-- sniper speed: `&zip_xy_scaler 1 4`
+- cursor gain: `scale-multiplier` / `scale-divisor` on
+  `zpt_right_cursor_transfer`, and the acceleration curve on
+  `zpt_right_cursor_acceleration` (eight points of ball speed in mm/s and
+  sensitivity in percent, plus the speed estimate's rise and fall times)
+- cursor noise gate: `zpt_right_cursor_gate`, compiled as a pass-through until
+  `enabled` is added
+- cursor report coalescing: `usb-report-interval-ms` and
+  `ble-report-interval-ms` on `zpt_right_cursor_coalescer` and
+  `zpt_right_sniper_coalescer`
+- sniper speed: `scale-divisor` on `zpt_right_sniper_transfer`
+- scroll speed: `steps-per-meter` on `zpt_right_scroll_batcher` and
+  `zpt_left_scroll_batcher`
+- scroll axis intent: `engage-ratio-percent`, `release-ratio-percent`,
+  `activation-distance-micrometers`, and `window-ms` on the `*_scroll_intent`
+  stages
+- Text steps: `horizontal-threshold-micrometers` and
+  `vertical-threshold-micrometers` on `zpt_right_text_nav` (lower is faster)
+- Text gesture classification: `zpt_right_text_intent`
+- left keypress guard: `suppress-after-keypress-ms` on `zpt_keypress_guard`
+- CPI: `resolution-cpi` on `zpt_right_ball` and `zpt_left_ball` (multiples of
+  38 from 608 to 4826; the boards' `res-cpi = <700>` runs at 684)
 
-The scroll values above, text-navigation thresholds and axis settings, and the
-left-trackball physical keypress guard can also be previewed at runtime from
-the local tuner. Runtime previews are validated and held only in RAM; reset
-them from the page or reboot to restore these Git-tracked defaults. The left
-guard currently defaults to the tested 40 ms threshold.
+Unless the keymap comments say otherwise, these reproduce the previous
+processor configuration at 684 CPI. The cursor acceleration curve is new and
+is a starting point to tune on the keyboard.
 
-The current tested Text defaults are 75-count horizontal and vertical steps,
-35-count activation distance, a 150% engage ratio, and a 40 ms idle timeout.
+## Pointing telemetry, runtime tuning, and calibration
 
-The reusable Scroll and Text processors live in the separately pinned
-`zmk-pointing-tools` module. Text locks one physical axis for each gesture;
-its independent step thresholds no longer bias that initial axis decision.
-
-## Pointing telemetry and runtime tuning
-
-The central firmware advertises raw and processed streams plus temporary
-scroll, text-navigation, and right-cursor noise-filter tuning targets through
-`zmk-pointing-tools`. The cursor filter is compiled in pass-through mode so it
-can first be enabled and evaluated without changing the default pointer
-behavior. Connect the right half over USB, then run the local tuner from a
-sibling checkout:
+Connect the right half over USB, then run the local tuner from a sibling
+checkout:
 
 ```console
 cd ../zmk-pointing-tools
 devenv up
 ```
 
-Open <http://localhost:8787> in desktop Chrome. The page discovers `Left
-scroll`, `Right scroll`, `Text navigation`, and `Right cursor noise filter`
-independently. It can preview
-scroll scale/filtering, text step distances, axis intent, timing, and the
-keypress guard. Stable `tuning-id` values allow versioned profiles to be
-exported and imported without depending on boot-time target order. **Copy
-config** generates a reviewable devicetree overlay for transferring current
-values back into this repository. Profile imports remain temporary and never
-write firmware settings to flash. Telemetry is disabled until requested and
-automatically stops if its heartbeat disappears; trace sessions can be
-exported as JSON. The creator-hosted tuning site uses an older, incompatible
-protocol and is no longer required.
+Open <http://localhost:8787> in desktop Chrome. Every tunable stage appears
+as its own target under its stable id (for example `right-cursor-transfer` or
+`left-scroll-batcher`), along with both balls' CPI. Changes are previews held
+in RAM; reset them from the page or reboot to restore the Git-tracked
+defaults. **Copy config** generates a reviewable devicetree overlay for
+transferring current values back into this repository, and profiles can be
+exported and imported by stable id.
+
+The Calibration panel sets gain from repeated gestures: measure from a ball's
+`*-normalize` stage, choose the target (cursor transfer, scroll batcher, or
+text navigation), enter what one gesture should produce, and repeat it 5 to
+10 times. It recommends a value with its confidence, applies it as a preview,
+and exports it as an importable profile. Per-stage diagnostics are off until
+requested and stop automatically if the tuner's heartbeat disappears.
 
 ## Building
 
