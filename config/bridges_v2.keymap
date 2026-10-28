@@ -549,8 +549,9 @@
      * end of this file). The event codes must match.
      *
      * The left sensor reports about 6x fewer counts per millimetre than the
-     * right one at the same 684 CPI setting. Swapping the balls and bypassing
-     * the compact codec changed nothing, so the cause is the sensor or its lens (#21).
+     * right one at the same 684 CPI setting. Swapping the balls and
+     * bypassing the compact codec changed nothing, so the cause is the
+     * sensor or its lens (#21).
      * Labelling its frames with the measured effective resolution makes
      * left distances physical, so the left scroll settings above match the
      * right ball's. The source therefore does not follow zpt_left_ball's
