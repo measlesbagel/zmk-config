@@ -580,28 +580,19 @@
     /* ---- Split sensor-control tunnel -------------------------------- */
 
     /* Lets the tuner read and preview the left ball's CPI through the
-     * central. The agent's node name must stay within 8 characters. */
+     * central. The agent answers on the left trackball's split channel,
+     * because ZMK's central never subscribes to a second input-split
+     * channel on the same half. The agent's node name must stay within 8
+     * characters. */
     zpt_cpi: zpt_cpi {
         compatible = "measlesbagel,zpt-sensor-control";
         #binding-cells = <0>;
-    };
-
-    split_inputs {
-        #address-cells = <1>;
-        #size-cells = <0>;
-
-        /* reg 0 is the left trackball's split input. */
-        zpt_cpi_split: zpt_cpi_split@1 {
-            compatible = "zmk,input-split";
-            reg = <1>;
-            device = <&zpt_cpi>;
-        };
+        split-input = <&trackball_peripheral_split>;
     };
 
     zpt_cpi_proxy {
         compatible = "measlesbagel,zpt-sensor-control-proxy";
         agent = <&zpt_cpi>;
-        input = <&zpt_cpi_split>;
     };
 };
 
