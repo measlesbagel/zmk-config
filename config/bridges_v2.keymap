@@ -497,24 +497,18 @@
         stable-id = "left-scroll-normalize";
     };
 
-    /* Same adaptive lock as the right ball, but left strokes are slower
-     * (about 6.5 mm/s against about 40 mm/s on the right when calibrated),
-     * so the activation distance is scaled down for them to lock an axis
-     * instead of going out undecided on both axes (see #21). */
     zpt_left_scroll_intent: zpt_left_scroll_intent {
         compatible = "measlesbagel,zpt-stage-axis-intent";
         stable-id = "left-scroll-intent";
         policy = <ZPT_AXIS_ADAPTIVE>;
         engage-ratio-percent = <300>;
         release-ratio-percent = <180>;
-        activation-distance-micrometers = <150>;
+        activation-distance-micrometers = <594>;
         window-ms = <64>;
         idle-timeout-ms = <120>;
         suppression = <&zpt_keypress_guard>;
     };
 
-    /* Timing matches the right ball: undecided motion is held up to 16 ms
-     * so it can go out along the axis that locks. */
     zpt_left_scroll_constraint: zpt_left_scroll_constraint {
         compatible = "measlesbagel,zpt-stage-axis-constraint";
         stable-id = "left-scroll-constraint";
@@ -523,12 +517,10 @@
         suppression = <&zpt_keypress_guard>;
     };
 
-    /* The previous 7/16 wheel step per count, measured for the
-     * non-dominant hand. Recalibrate it from the tuner. */
     zpt_left_scroll_batcher: zpt_left_scroll_batcher {
         compatible = "measlesbagel,zpt-stage-scroll-batcher";
         stable-id = "left-scroll-batcher";
-        steps-per-meter = <11781>;
+        steps-per-meter = <3366>;
         report-interval-ms = <16>;
         suppression = <&zpt_keypress_guard>;
     };
@@ -554,12 +546,20 @@
     };
 
     /* Decodes the left half's compact split frames (see the encoder at the
-     * end of this file). The event codes must match. */
+     * end of this file). The event codes must match.
+     *
+     * The left sensor reports about 6x fewer counts per millimetre than the
+     * right one at the same 684 CPI setting. Swapping the balls and bypassing
+     * the compact codec changed nothing, so the cause is the sensor or its lens (#21).
+     * Labelling its frames with the measured effective resolution makes
+     * left distances physical, so the left scroll settings above match the
+     * right ball's. The source therefore does not follow zpt_left_ball's
+     * CPI: a CPI preview on the left ball changes scroll speed. */
     zpt_left_source: zpt_left_source {
         compatible = "measlesbagel,zpt-input-processor-source";
         #input-processor-cells = <0>;
         source-id = <0>;
-        device = <&zpt_left_ball>;
+        resolution-cpi = <114>;
         router = <&zpt_left_router>;
         transported;
         compact-event-code = <INPUT_REL_Z>;
