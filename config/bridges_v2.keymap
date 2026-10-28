@@ -509,23 +509,19 @@
         suppression = <&zpt_keypress_guard>;
     };
 
-    /* Frames arrive once per 8 ms sensor read, so undecided motion folds
-     * and reports go out on the next millisecond. */
     zpt_left_scroll_constraint: zpt_left_scroll_constraint {
         compatible = "measlesbagel,zpt-stage-axis-constraint";
         stable-id = "left-scroll-constraint";
         idle-timeout-ms = <120>;
-        fold-interval-ms = <1>;
+        fold-interval-ms = <16>;
         suppression = <&zpt_keypress_guard>;
     };
 
-    /* The previous 7/16 wheel step per count, measured for the
-     * non-dominant hand. Recalibrate it from the tuner. */
     zpt_left_scroll_batcher: zpt_left_scroll_batcher {
         compatible = "measlesbagel,zpt-stage-scroll-batcher";
         stable-id = "left-scroll-batcher";
-        steps-per-meter = <11781>;
-        report-interval-ms = <1>;
+        steps-per-meter = <3366>;
+        report-interval-ms = <16>;
         suppression = <&zpt_keypress_guard>;
     };
 
@@ -550,12 +546,21 @@
     };
 
     /* Decodes the left half's compact split frames (see the encoder at the
-     * end of this file). The event codes must match. */
+     * end of this file). The event codes must match.
+     *
+     * The left sensor reports about 6x fewer counts per millimetre than the
+     * right one at the same 684 CPI setting. Swapping the balls and
+     * bypassing the compact codec changed nothing, so the cause is the
+     * sensor or its lens (#21).
+     * Labelling its frames with the measured effective resolution makes
+     * left distances physical, so the left scroll settings above match the
+     * right ball's. The source therefore does not follow zpt_left_ball's
+     * CPI: a CPI preview on the left ball changes scroll speed. */
     zpt_left_source: zpt_left_source {
         compatible = "measlesbagel,zpt-input-processor-source";
         #input-processor-cells = <0>;
         source-id = <0>;
-        device = <&zpt_left_ball>;
+        resolution-cpi = <114>;
         router = <&zpt_left_router>;
         transported;
         compact-event-code = <INPUT_REL_Z>;
