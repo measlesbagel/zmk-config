@@ -562,8 +562,7 @@
         device = <&zpt_left_ball>;
         router = <&zpt_left_router>;
         transported;
-        /* DIAGNOSTIC (#21): plain REL_X/REL_Y over the split, no compact
-         * codec, to check whether the codec shrinks left-ball distance. */
+        compact-event-code = <INPUT_REL_Z>;
     };
 
     zpt_left_output: zpt_left_output {
@@ -658,8 +657,6 @@
  * counts, sequence, and timing. The driver reads every 8 ms while the ball
  * moves, and the 7.5 ms split link carries each read as it comes. */
 &trackball_peripheral_split {
-    /* DIAGNOSTIC (#21): forward raw sensor axes without the compact
-     * encoder or the board's default rate limiter and packer. */
-    /delete-property/ input-processors;
+    input-processors = <&zpt_compact_encoder>;
 };
 #endif
