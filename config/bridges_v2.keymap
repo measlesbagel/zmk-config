@@ -34,11 +34,7 @@
 #define EDIT_COPY  &kp LC(C)
 #define EDIT_PASTE &kp LC(V)
 
-#if defined(BRIDGES_RIGHT_CONFIG)
 #define ADMIN_OUTPUT &out OUT_TOG
-#else
-#define ADMIN_OUTPUT &none
-#endif
 
 / {
     behaviors {
@@ -173,11 +169,13 @@
 };
 
 /*
- * Pointing runs on ZMK Pointing Tools pipelines on the central.
+ * Pointing runs on ZMK Pointing Tools pipelines on the split central,
+ * whichever device that is: the dongle, the left half or the right half.
+ * Everything below is the same for all three; the board decides which
+ * listener reads a local sensor and which reads a split channel.
  *
- * Right ball (central): one router with cursor, scroll, text, and sniper
- * pipelines, selected by layer. Left ball (peripheral): compact split frames
- * into a router whose only pipeline is guarded adaptive scrolling.
+ * Right ball: one router with cursor, scroll, text, and sniper
+ * pipelines, selected by layer. Left ball: a router whose only pipeline is guarded adaptive scrolling.
  *
  * Distances are physical (micrometres, steps per metre), so changing CPI
  * from the tuner changes cursor speed only. Every tunable stage can be
@@ -203,6 +201,8 @@
     zpt_left_ball: zpt_left_ball {
         compatible = "measlesbagel,zpt-pointing-device";
         stable-id = "left-ball";
+        /* 0 = central, else peripheral index + 1. Right only for the
+         * right-half-central setup; the CPI tunnel rework replaces it. */
         location = <1>;
         resolution-cpi = <684>;
         cpi-min = <608>;
@@ -482,6 +482,10 @@
         source-id = <1>;
         device = <&zpt_right_ball>;
         router = <&zpt_right_router>;
+        /* Takes compact split frames when the ball is on a peripheral and
+         * plain X/Y when it is local to the central. */
+        transported;
+        compact-event-code = <INPUT_REL_Z>;
     };
 
     zpt_right_output: zpt_right_output {
@@ -587,7 +591,9 @@
     zpt_cpi: zpt_cpi {
         compatible = "measlesbagel,zpt-sensor-control";
         #binding-cells = <0>;
-        split-input = <&trackball_peripheral_split>;
+        /* TODO: each half should answer on its own channel. The CPI tunnel
+         * rework in zmk-pointing-tools (with #24) changes this wiring. */
+        split-input = <&trackball_left_split>;
     };
 
     zpt_cpi_proxy {
@@ -596,15 +602,6 @@
     };
 };
 
-/* CPI is changed from the tuner through the device table, which keeps every
- * distance-based setting correct. The inherited CPI behaviors would change
- * the sensor behind the pipelines' back and reapply saved values at boot. */
-&dpi_cycle_left { status = "disabled"; };
-&dpi_cycle_right { status = "disabled"; };
-&cpi_set_l { status = "disabled"; };
-&cpi_set_r { status = "disabled"; };
-
-#if defined(BRIDGES_RIGHT_CONFIG)
 / {
     zpt_telemetry {
         compatible = "measlesbagel,zpt-telemetry";
@@ -617,38 +614,43 @@
                      &zpt_right_sniper &zpt_left_scroll>;
     };
 
-    /* Superseded by the ZMK Pointing Tools telemetry service. */
-    trackball_config {
-        status = "disabled";
-    };
-
+    /* The board enables this USB serial port only on the central, so the
+     * telemetry service builds there only. */
     chosen {
-        measlesbagel,zpt-telemetry-uart = &tbcfg_acm;
+        measlesbagel,zpt-telemetry-uart = &config_acm;
     };
 };
 
-&zpt_right_ball {
-    sensor = <&trackball_central>;
-};
-
-&trackball_central_listener {
+/* The board enables these only on the central. */
+&trackball_right_listener {
     input-processors = <&zpt_right_source>;
 };
 
-&trackball_peripheral_listener {
+&trackball_left_listener {
     input-processors = <&zpt_left_source>;
+};
+
+/* Each half sends every sensor read as one compact split event carrying
+ * exact signed counts, sequence, and timing. The driver reads every 8 ms
+ * while the ball moves, and the 7.5 ms split link carries each read as it
+ * comes. A channel only sends from the half that owns it. */
+&trackball_left_split {
+    input-processors = <&zpt_compact_encoder>;
+};
+
+&trackball_right_split {
+    input-processors = <&zpt_compact_encoder>;
+};
+
+/* Each half names its own sensor for CPI control. */
+#if defined(BRIDGES_V2_RIGHT_TRACKBALL)
+&zpt_right_ball {
+    sensor = <&trackball_right>;
 };
 #endif
 
-#if defined(BRIDGES_LEFT)
+#if defined(BRIDGES_V2_LEFT_TRACKBALL)
 &zpt_left_ball {
-    sensor = <&trackball_peripheral>;
-};
-
-/* Send each sensor read as one compact split event carrying exact signed
- * counts, sequence, and timing. The driver reads every 8 ms while the ball
- * moves, and the 7.5 ms split link carries each read as it comes. */
-&trackball_peripheral_split {
-    input-processors = <&zpt_compact_encoder>;
+    sensor = <&trackball_left>;
 };
 #endif

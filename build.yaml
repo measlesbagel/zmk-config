@@ -1,8 +1,25 @@
 ---
+# A half built without the bridges_v2_central snippet is a peripheral and
+# works with any central. Flash one central: the dongle, or one half built
+# with the snippet. Flash the settings reset images to every device when
+# switching centrals.
 include:
+  # Peripherals, for any central.
   - board: bridges_v2_left
     artifact-name: bridges_v2_54_left
-    cmake-args: -DDTS_EXTRA_CPPFLAGS="-DBRIDGES_LEFT"
   - board: bridges_v2_right
     artifact-name: bridges_v2_54_right
-    cmake-args: -DDTS_EXTRA_CPPFLAGS="-DBRIDGES_RIGHT_CONFIG"
+
+  # Centrals: pick one.
+  - board: xiao_ble//zmk
+    shield: bridges_v2_dongle prospector_adapter
+    artifact-name: bridges_v2_54_dongle_prospector
+  - board: xiao_ble//zmk
+    shield: bridges_v2_dongle
+    artifact-name: bridges_v2_54_dongle
+  - board: bridges_v2_right
+    snippet: bridges_v2_central
+    artifact-name: bridges_v2_54_right_central
+  - board: bridges_v2_left
+    snippet: bridges_v2_central
+    artifact-name: bridges_v2_54_left_central
