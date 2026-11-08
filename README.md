@@ -59,10 +59,6 @@ central:
 setups, flash the settings reset image to every device first, then pair the
 halves to the new central. The tuner connects to whichever device is
 central, over USB or Bluetooth.
-
-Changing a ball's CPI from the tuner works only with the right half as
-central for now. The other setups need the CPI tunnel rework in
-`zmk-pointing-tools`.
 Distances are physical (micrometres and steps per metre), so changing CPI
 changes cursor speed without changing scroll speed, text steps, or the
 motion gate.

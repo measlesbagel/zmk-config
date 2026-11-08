@@ -186,12 +186,14 @@
  * the PAW3222's real 684 CPI (its driver applies multiples of 38).
  */
 / {
-    /* Physical pointing devices, declared identically on both halves so
-     * device ids agree. Each half adds its own sensor at the end of this
-     * file. */
+    /* Physical pointing devices, declared identically on every device so
+     * device ids agree. split-input names the channel each ball's half
+     * sends on, so CPI requests reach it whatever the central and pairing
+     * order. Each half adds its own sensor at the end of this file. */
     zpt_right_ball: zpt_right_ball {
         compatible = "measlesbagel,zpt-pointing-device";
         stable-id = "right-ball";
+        split-input = <&trackball_right_split>;
         resolution-cpi = <684>;
         cpi-min = <608>;
         cpi-max = <4826>;
@@ -201,9 +203,7 @@
     zpt_left_ball: zpt_left_ball {
         compatible = "measlesbagel,zpt-pointing-device";
         stable-id = "left-ball";
-        /* 0 = central, else peripheral index + 1. Right only for the
-         * right-half-central setup; the CPI tunnel rework replaces it. */
-        location = <1>;
+        split-input = <&trackball_left_split>;
         resolution-cpi = <684>;
         cpi-min = <608>;
         cpi-max = <4826>;
@@ -583,17 +583,13 @@
 
     /* ---- Split sensor-control tunnel -------------------------------- */
 
-    /* Lets the tuner read and preview the left ball's CPI through the
-     * central. The agent answers on the left trackball's split channel,
-     * because ZMK's central never subscribes to a second input-split
-     * channel on the same half. The agent's node name must stay within 8
-     * characters. */
+    /* Lets the tuner read and preview a remote ball's CPI through the
+     * central, whichever device that is. Each half answers on its own
+     * ball's split channel (the devices' split-input above). The agent's
+     * node name must stay within 8 characters. */
     zpt_cpi: zpt_cpi {
         compatible = "measlesbagel,zpt-sensor-control";
         #binding-cells = <0>;
-        /* TODO: each half should answer on its own channel. The CPI tunnel
-         * rework in zmk-pointing-tools (with #24) changes this wiring. */
-        split-input = <&trackball_left_split>;
     };
 
     zpt_cpi_proxy {
