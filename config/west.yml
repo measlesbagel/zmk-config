@@ -47,7 +47,7 @@ manifest:
     # Reusable pointing processors and host tuning infrastructure.
     - name: zmk-pointing-tools
       remote: measlesbagel
-      revision: 2114850fd81ed0e99378838c12021fa8f19b002a
+      revision: 36154937958f964f5b13add03edfbbc23c1a93d6
       path: modules/zmk-pointing-tools
 
     # Trackball sensor driver.
