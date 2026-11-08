@@ -11,9 +11,8 @@ include:
     artifact-name: bridges_v2_54_right
 
   # Centrals: pick one.
-  # The Prospector module's Zephyr 4.1 branch wires its display in a
-  # board overlay for plain xiao_ble, which xiao_ble//zmk doesn't load.
-  - board: xiao_ble
+  # config/prospector_adapter_xiao_ble.overlay supplies the display wiring.
+  - board: xiao_ble//zmk
     shield: bridges_v2_dongle prospector_adapter
     artifact-name: bridges_v2_54_dongle_prospector
   - board: xiao_ble//zmk
