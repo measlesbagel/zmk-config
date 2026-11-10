@@ -40,9 +40,25 @@ substantially less raw distance with the left hand; recalibrate it from the
 tuner's Calibration panel.
 
 Both balls run on `zmk-pointing-tools` pipelines on the central: one router
-per ball, with the right ball's pipeline chosen by the active layer. The left
-half sends each sensor read to the central as one compact split event, so
-the central sees exact signed counts with sequence and timing.
+per ball, with the right ball's pipeline chosen by the active layer. A half
+that isn't central sends each sensor read to the central as one compact split
+event, so the central sees exact signed counts with sequence and timing.
+
+## Choosing the central
+
+The same config builds three setups. Flash both halves' plain images and one
+central:
+
+| Setup | Central image | Left half | Right half |
+| --- | --- | --- | --- |
+| Prospector dongle | `bridges_v2_54_dongle_prospector` | `bridges_v2_54_left` | `bridges_v2_54_right` |
+| Right half central | `bridges_v2_54_right_central` | `bridges_v2_54_left` | (central) |
+| Left half central | `bridges_v2_54_left_central` | (central) | `bridges_v2_54_right` |
+
+`bridges_v2_54_dongle` is the dongle without the display. When switching
+setups, flash the settings reset image to every device first, then pair the
+halves to the new central. The tuner connects to whichever device is
+central, over USB or Bluetooth.
 Distances are physical (micrometres and steps per metre), so changing CPI
 changes cursor speed without changing scroll speed, text steps, or the
 motion gate.
@@ -100,7 +116,7 @@ is a starting point to tune on the keyboard.
 
 ## Pointing telemetry, runtime tuning, and calibration
 
-Connect the right half over USB, then run the local tuner from a sibling
+Connect the central over USB, then run the local tuner from a sibling
 checkout:
 
 ```console

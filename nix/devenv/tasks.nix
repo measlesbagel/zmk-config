@@ -11,8 +11,13 @@ let
   buildTasks = {
     "firmware:build:bridges:left" = "bridges_v2_54_left";
     "firmware:build:bridges:right" = "bridges_v2_54_right";
+    "firmware:build:bridges:left-central" = "bridges_v2_54_left_central";
+    "firmware:build:bridges:right-central" = "bridges_v2_54_right_central";
+    "firmware:build:bridges:dongle" = "bridges_v2_54_dongle_prospector";
+    "firmware:build:bridges:dongle-no-display" = "bridges_v2_54_dongle";
     "firmware:build:bridges:left-reset" = "bridges_v2_left_settings_reset";
-    "firmware:build:bridges:right-reset" = "bridges_v2_settings_reset";
+    "firmware:build:bridges:right-reset" = "bridges_v2_right_settings_reset";
+    "firmware:build:bridges:dongle-reset" = "bridges_v2_dongle_settings_reset";
   };
 
   buildTaskNames = builtins.attrNames buildTasks;
