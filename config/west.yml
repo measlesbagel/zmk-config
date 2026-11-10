@@ -41,7 +41,7 @@ manifest:
     # Bridges V2 board definition.
     - name: bridges-v2-zmk-firmware
       remote: measlesbagel
-      revision: ccb5524ad2a207551b5785298b5aa888d77b7cf7
+      revision: 8012823f778f4d74001a7082a76a776cfd339711
       path: modules/bridges-v2-zmk-firmware
 
     # Reusable pointing processors and host tuning infrastructure.
